@@ -1,0 +1,39 @@
+@import '~semantic-ui-css/semantic.min.css';
+
+.ui.fullscreen.modal > .content {
+  height: 75vh;
+}
+
+.mce-branding {
+  pointer-events: none;
+}
+
+.float-right {
+  float: right;
+}
+
+.ui.modal > header {
+  padding: 1.5rem;
+}
+
+.ui.search.fluid .input,
+.ui.search.fluid input {
+  width: 100%;
+}
+
+.ui.table tbody td small {
+  color: #767676;
+}
+
+.ui.pagination.menu {
+  justify-content: center;
+}
+
+
+.typed-table {
+  height: calc(100vh - 2rem);
+  margin-bottom: -1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
