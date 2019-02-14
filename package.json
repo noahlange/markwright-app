@@ -74,7 +74,7 @@
     "lint": "tslint --fix -c tslint.json 'src/**/*.{ts,tsx}'",
     "start": "electron .",
     "pretty": "prettier --write 'src/**/*.{ts,tsx}'",
-    "check": "tsc",
+    "types": "tsc",
     "rebuild": "./tasks/sass.sh",
     "dist": "yarn run build && build"
   },

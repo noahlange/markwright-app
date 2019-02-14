@@ -109,7 +109,7 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
   }
 
   @autobind
-  public editorWillMount(monaco: typeof Monaco) {
+  public editorWillMount(monaco: $AnyFixMe) {
     monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
       allowComments: true,
       schemas: [
@@ -123,11 +123,14 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
   }
 
   @autobind
-  public editorDidMount(editor: Monaco.editor.ICodeEditor) {
-    editor.getModel().updateOptions({ tabSize: 2 });
-    this.editor = editor;
-    this.editor.focus();
-    this.editor.layout();
+  public editorDidMount(editor: $AnyFixMe) {
+    const model = editor.getModel();
+    if (model) {
+      model.updateOptions({ tabSize: 2 });
+      this.editor = editor;
+      this.editor.focus();
+      this.editor.layout();
+    }
   }
 
   @autobind
