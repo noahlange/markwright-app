@@ -1,6 +1,6 @@
+import Events from '@common/events';
 import { app } from 'electron';
 import App from '../App';
-import Events from '@common/events';
 
 let application: App;
 // This method will be called when Electron has finished

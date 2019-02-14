@@ -1,9 +1,9 @@
 import React from 'react';
 import { render } from 'react-dom';
 
-import { ContentResponse } from '@main/events/Content';
-import { ContentType, IProject } from '@common/types';
 import Events from '@common/events';
+import { ContentType, IProject } from '@common/types';
+import { ContentResponse } from '@main/events/Content';
 
 import Preview from '../components/preview';
 
