@@ -1,6 +1,6 @@
-import lc from 'line-column';
-import { parse, ParseError, ParseErrorCode } from 'jsonc-parser';
 import App from '@main/App';
+import { parse, ParseError, ParseErrorCode } from 'jsonc-parser';
+import lc from 'line-column';
 
 const ParseErrors: Record<ParseErrorCode, string> = {
   [1]: 'Invalid symbol',
@@ -33,8 +33,8 @@ export default class JSONCProcessor {
       errors: errors.map(e => {
         const { line, col } = lc(content, e.offset) || { line: 0, col: 0 };
         return {
-          line,
           col,
+          line,
           message: `JSON Parse error: ${ParseErrors[e.error]}`
         };
       }),

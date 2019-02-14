@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { ContentType, IError } from '@common/types';
+import * as React from 'react';
 
 type ProblemsProps = {
   data: Record<ContentType, IError[]>;

@@ -1,26 +1,27 @@
-import EventBus from './Bus';
 import { parse } from 'jsonc-parser';
+import EventBus from './Bus';
 
 import Events from '@common/events';
-import { IProject, ContentType } from '@common/types';
-import { promises } from 'fs';
-import { dirname, basename, resolve } from 'path';
-import { homedir } from 'os';
-import { dialog } from 'electron';
+import { ContentType, IProject } from '@common/types';
 import App from '@main/App';
+import { dialog } from 'electron';
+import { promises } from 'fs';
+import { homedir } from 'os';
+import { basename, dirname, resolve } from 'path';
+import { promisify } from 'util';
 
 const empty = {
-  errors: {
-    [ContentType.CONTENT]: [],
-    [ContentType.STYLES]: [],
-    [ContentType.METADATA]: []
-  },
   content: {
     [ContentType.CONTENT]: '',
     [ContentType.STYLES]: '',
     [ContentType.METADATA]: '{}'
   },
   directory: homedir() + '/',
+  errors: {
+    [ContentType.CONTENT]: [],
+    [ContentType.STYLES]: [],
+    [ContentType.METADATA]: []
+  },
   filename: null
 };
 
@@ -48,9 +49,9 @@ export default class ProjectEvents extends EventBus {
       const file = await promises.readFile(filename, 'utf8');
       this.app.project = {
         ...empty,
+        content: parse(file),
         directory: dirname(filename),
-        filename: basename(filename),
-        content: parse(file)
+        filename: basename(filename)
       };
       this.app.emit(Events.APP_LOAD, this.app.project);
     }

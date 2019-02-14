@@ -35,7 +35,9 @@
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.14",
     "webpack-merge": "^4.2.1",
-    "webpack-node-externals": "^1.7.2"
+    "webpack-node-externals": "^1.7.2",
+    "tslint": "^5.12.1",
+    "tslint-config-prettier": "^1.18.0"
   },
   "dependencies": {
     "core-decorators": "^0.20.0",
@@ -70,9 +72,10 @@
   },
   "scripts": {
     "build": "webpack --config tasks/webpack.config.js",
+    "lint": "tslint --fix -c tslint.json 'src/**/*.{ts,tsx}'",
     "start": "electron .",
     "pretty": "prettier --write 'src/**/*.{ts,tsx}'",
-    "check": "tsc",
+    "types": "tsc",
     "rebuild": "./tasks/sass.sh"
   }
 }

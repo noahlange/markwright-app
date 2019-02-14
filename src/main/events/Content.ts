@@ -1,9 +1,9 @@
-import EventBus from './Bus';
 import Events from '@common/events';
-import { IError, ContentType } from '@common/types';
+import { ContentType, IError } from '@common/types';
 import JSONCProcessor from '@main/processors/jsonc';
 import MarkdownProcessor from '@main/processors/markdown';
 import SASSProcessor from '@main/processors/sass';
+import EventBus from './Bus';
 
 type ContentPayload = {
   type: ContentType;

@@ -1,10 +1,10 @@
-import sass from 'node-sass';
-import cache from 'js-cache';
 import { promises } from 'fs';
+import cache from 'js-cache';
+import sass from 'node-sass';
 import path from 'path';
 
-import { IProcessor } from '@main/events/Content';
 import App from '@main/App';
+import { IProcessor } from '@main/events/Content';
 
 const read = promises.readFile;
 
@@ -51,22 +51,22 @@ export default class SASSProcessor implements IProcessor {
     if (value !== '') {
       try {
         return {
-          value: await this.sass(value),
+          errors: [],
           success: true,
-          errors: []
+          value: await this.sass(value)
         };
       } catch (e) {
         return {
-          value: '',
+          errors: [{ message: e }],
           success: false,
-          errors: [{ message: e }]
+          value: ''
         };
       }
     } else {
       return {
-        value,
+        errors: [],
         success: true,
-        errors: []
+        value
       };
     }
   }
