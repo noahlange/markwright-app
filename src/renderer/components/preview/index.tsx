@@ -1,10 +1,10 @@
-import React from 'react';
+import { ContentType } from '@common/types';
+import cache from 'js-cache';
 // @ts-ignore
 import Markwright from 'markwright';
+import React from 'react';
 import { proxy } from 'workly/index';
-import cache from 'js-cache';
 import { styles } from '../../themes/markwright';
-import { ContentType } from '@common/types';
 
 type PreviewProps = {
   base: string;

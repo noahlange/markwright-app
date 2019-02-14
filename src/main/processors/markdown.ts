@@ -1,16 +1,16 @@
 import {
-  transcludeString,
   resolveHttpUrl,
   resolveLocalUrl,
-  resolveString
+  resolveString,
+  transcludeString
 } from 'hercule';
 
-import path from 'path';
+import App from '@main/App';
+import { IProcessor } from '@main/events/Content';
 import cache from 'js-cache';
+import path from 'path';
 import toString from 'stream-to-string';
 import { promisify } from 'util';
-import { IProcessor } from '@main/events/Content';
-import App from '@main/App';
 
 function fetch(base: string) {
   return [resolveHttpUrl, resolveLocalUrl, resolveString].map(resolve => {
@@ -46,16 +46,16 @@ export default class MarkdownProcessor implements IProcessor {
         resolvers: fetch(this.app.basedir)
       });
       return {
-        value: markdown,
+        errors: [],
         success: true,
-        errors: []
+        value: markdown
       };
     } catch (e) {
       return {
-        value: '',
+        errors: [{ message: e.message, line: 0, col: 0 }],
         success: false,
+        value: ''
         // @todo get lc
-        errors: [{ message: e.message, line: 0, col: 0 }]
       };
     }
   }

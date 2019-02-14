@@ -4,8 +4,8 @@ import * as Monaco from 'monaco-editor';
 import * as React from 'react';
 import MonacoEditor from 'react-monaco-editor';
 
-import { listen, unlisten } from '@renderer/utils/listen';
 import { ContentType } from '@common/types';
+import { listen, unlisten } from '@renderer/utils/listen';
 
 type ContentHash = Record<ContentType, string>;
 

@@ -1,5 +1,5 @@
-import './preload';
 import '../styles/index.scss';
+import './preload';
 
 import React from 'react';
 import { render } from 'react-dom';

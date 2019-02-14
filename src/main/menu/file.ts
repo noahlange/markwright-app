@@ -1,5 +1,5 @@
-import App from '@main/App';
 import Events from '@common/events';
+import App from '@main/App';
 import { MenuItemConstructorOptions } from 'electron';
 
 export default function(app: App): MenuItemConstructorOptions {
@@ -7,16 +7,16 @@ export default function(app: App): MenuItemConstructorOptions {
     label: 'File',
     submenu: [
       {
-        label: 'Open',
-        role: 'open',
         accelerator: 'Cmd+O',
-        click: () => app.emit(Events.APP_OPEN)
+        click: () => app.emit(Events.APP_OPEN),
+        label: 'Open',
+        role: 'open'
       },
       {
-        label: 'Save',
-        role: 'save',
         accelerator: 'Cmd+S',
-        click: () => app.emit(Events.APP_SAVE)
+        click: () => app.emit(Events.APP_SAVE),
+        label: 'Save',
+        role: 'save'
       },
       // {
       //   label: 'Save as',
@@ -25,10 +25,10 @@ export default function(app: App): MenuItemConstructorOptions {
       //   click: () => app.emit(Events.APP_SAVE_AS)
       // },
       {
-        label: 'Export to PDF',
-        role: 'print',
         accelerator: 'Cmd+Shift+E',
-        click: () => app.emit(Events.APP_EXPORT_PDF)
+        click: () => app.emit(Events.APP_EXPORT_PDF),
+        label: 'Export to PDF',
+        role: 'print'
       }
     ]
   };

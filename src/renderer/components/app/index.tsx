@@ -1,9 +1,9 @@
 import React from 'react';
-import { Mosaic, MosaicWindow, MosaicParent } from 'react-mosaic-component';
 import WebView from 'react-electron-web-view';
+import { Mosaic, MosaicParent, MosaicWindow } from 'react-mosaic-component';
 
 import Events from '@common/events';
-import { IProject, ContentType } from '@common/types';
+import { ContentType, IProject } from '@common/types';
 import { ContentResponse } from '@main/events/Content';
 
 import Editor from '../editor';
@@ -42,25 +42,22 @@ export default class Markwright extends React.Component<{}, AppState> {
       second: Panes.PREVIEW
     },
     project: {
-      errors: {
-        [ContentType.CONTENT]: [],
-        [ContentType.STYLES]: [],
-        [ContentType.METADATA]: []
-      },
       content: {
         [ContentType.CONTENT]: '',
         [ContentType.STYLES]: '',
         [ContentType.METADATA]: '{}'
       },
       directory: '',
+      errors: {
+        [ContentType.CONTENT]: [],
+        [ContentType.STYLES]: [],
+        [ContentType.METADATA]: []
+      },
       filename: 'Untitled.mw'
     }
   };
 
   public on = {
-    changeMosaic: async (mosaic: Panes | MosaicParent<Panes> | null) => {
-      this.setState({ mosaic });
-    },
     changeContent: async (type: ContentType, value: string) => {
       if (this.state.project) {
         const { project } = this.state;
@@ -79,6 +76,9 @@ export default class Markwright extends React.Component<{}, AppState> {
           }
         );
       }
+    },
+    changeMosaic: async (mosaic: Panes | MosaicParent<Panes> | null) => {
+      this.setState({ mosaic });
     }
   };
 

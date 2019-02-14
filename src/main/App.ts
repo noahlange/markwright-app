@@ -2,27 +2,27 @@ import {
   App as ElectronApp,
   BrowserWindow,
   ipcMain,
-  WebContents,
-  Menu
+  Menu,
+  WebContents
 } from 'electron';
 import installExtension, {
   REACT_DEVELOPER_TOOLS
 } from 'electron-devtools-installer';
 
+import { homedir } from 'os';
 import { resolve } from 'path';
 import { format } from 'url';
-import { homedir } from 'os';
 
-import { IProject } from '@common/types';
 import Events from '@common/events';
+import { IProject } from '@common/types';
 
-import MakeProject from './events/Project';
 import MakeContent from './events/Content';
+import MakeProject from './events/Project';
 
-import file from './menu/file';
-import view from './menu/view';
-import main from './menu/main';
 import edit from './menu/edit';
+import file from './menu/file';
+import main from './menu/main';
+import view from './menu/view';
 import window from './menu/window';
 
 type AppSettings = {
@@ -43,12 +43,17 @@ export default class App {
     content: MakeContent;
   };
 
+  public constructor(settings: AppSettings) {
+    this.electron = settings.app;
+    this.initialize();
+  }
+
   public async createWindow() {
     this.window = new BrowserWindow({
       height: 800,
-      width: 1280,
       titleBarStyle: 'hidden',
-      vibrancy: 'dark'
+      vibrancy: 'dark',
+      width: 1280
     });
 
     this.window.loadURL(
@@ -100,13 +105,8 @@ export default class App {
     );
 
     this.events = {
-      project: MakeProject.from<MakeProject>(this),
-      content: MakeContent.from<MakeContent>(this)
+      content: MakeContent.from<MakeContent>(this),
+      project: MakeProject.from<MakeProject>(this)
     };
-  }
-
-  public constructor(settings: AppSettings) {
-    this.electron = settings.app;
-    this.initialize();
   }
 }
