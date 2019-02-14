@@ -1,13 +1,29 @@
-import { App as ElectronApp, BrowserWindow } from 'electron';
+import {
+  App as ElectronApp,
+  BrowserWindow,
+  ipcMain,
+  WebContents,
+  Menu
+} from 'electron';
 import installExtension, {
   REACT_DEVELOPER_TOOLS
 } from 'electron-devtools-installer';
+
 import { resolve } from 'path';
 import { format } from 'url';
-import { Connection, createConnection } from 'typeorm';
+import { homedir } from 'os';
 
-import { Main, Renderer } from '../common/events';
-import { SnakeNamingStrategy } from './strategy';
+import { IProject } from '@common/types';
+import Events from '@common/events';
+
+import MakeProject from './events/Project';
+import MakeContent from './events/Content';
+
+import file from './menu/file';
+import view from './menu/view';
+import main from './menu/main';
+import edit from './menu/edit';
+import window from './menu/window';
 
 type AppSettings = {
   app: ElectronApp;
@@ -15,66 +31,82 @@ type AppSettings = {
 };
 
 export default class App {
-  public connection: Connection | null = null;
   public window: BrowserWindow | null = null;
+  public clients: WebContents[] = [];
   public electron: ElectronApp;
-  public basedir: string;
+  public basedir: string = homedir();
+  public version: string = '0.1.0';
 
-  public version = '0.1.0';
+  public project!: IProject;
+  public events!: {
+    project: MakeProject;
+    content: MakeContent;
+  };
 
   public async createWindow() {
-    this.window = new BrowserWindow({ height: 800, width: 1280 });
+    this.window = new BrowserWindow({
+      height: 800,
+      width: 1280,
+      titleBarStyle: 'hidden',
+      vibrancy: 'dark'
+    });
+
     this.window.loadURL(
       format({
-        pathname: resolve(this.basedir, './dist/index.html'),
+        pathname: resolve(__dirname, '../index.html'),
         protocol: 'file:',
         slashes: true
       })
     );
-    this.window.on(Main.WINDOW_CLOSED, () => {
+
+    this.window.on(Events.WINDOW_CLOSED, () => {
       this.window = null;
     });
+  }
 
-    this.window.webContents.on(Renderer.DID_FINISH_LOAD, () => {
-      const data: any = {
-        version: this.version,
-        config: null,
-        sites: [],
-        themes: []
-      };
-      if (this.window) {
-        this.window.webContents.send(Main.APP_DATA_LOADED, data);
-        this.window.webContents.openDevTools();
+  public async emit(channel: Events, ...data: any[]) {
+    ipcMain.emit(channel, null, ...data);
+    for (const client of this.clients) {
+      try {
+        await client.send(channel, ...data);
+      } catch (e) {
+        // likely that the client has been destroyed
+        this.clients.splice(this.clients.indexOf(client), 1);
       }
-    });
-  }
-
-  public async createConnection() {
-    this.connection = await createConnection({
-      type: 'sqlite',
-      logging: true,
-      database: resolve(this.basedir, './dist/database.sqlite'),
-      synchronize: true,
-      entities: [],
-      namingStrategy: new SnakeNamingStrategy()
-    });
-  }
-
-  public async init() {
-    await installExtension(REACT_DEVELOPER_TOOLS);
-    await this.createConnection();
-    await this.createWindow();
-  }
-
-  public async close() {
-    if (this.connection) {
-      await this.connection.close();
     }
+  }
+
+  public async initialize() {
+    Menu.setApplicationMenu(
+      Menu.buildFromTemplate([
+        main(this),
+        file(this),
+        edit(this),
+        view(this),
+        window(this)
+      ])
+    );
+    await installExtension(REACT_DEVELOPER_TOOLS);
+    await this.createWindow();
+
+    ipcMain.on(
+      Events.APP_EVENT,
+      (_: Electron.Event, c: Events, args: any[]) => {
+        if (c === Events.APP_CONNECTED) {
+          this.clients.push(_.sender);
+        }
+        this.emit(c, ...args);
+      }
+    );
+
+    this.events = {
+      project: MakeProject.from<MakeProject>(this),
+      content: MakeContent.from<MakeContent>(this)
+    };
   }
 
   public constructor(settings: AppSettings) {
     this.electron = settings.app;
-    this.basedir = settings.basedir;
-    this.init();
+    this.initialize();
   }
 }

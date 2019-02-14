@@ -1,15 +1,12 @@
-import 'reflect-metadata';
-import 'sqlite3';
-
 import { app } from 'electron';
-
-import App from './app';
+import App from '../App';
+import Events from '@common/events';
 
 let application: App;
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', () => {
+app.on(Events.APP_READY, () => {
   application = new App({
     app,
     basedir: process.cwd()
@@ -17,16 +14,15 @@ app.on('ready', () => {
 });
 
 // Quit when all windows are closed.
-app.on('window-all-closed', async () => {
+app.on(Events.WINDOW_ALL_CLOSED, async () => {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') {
-    await application.close();
     app.quit();
   }
 });
 
-app.on('activate', () => {
+app.on(Events.APP_ACTIVATE, () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (application.window === null) {

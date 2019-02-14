@@ -1,10 +1,10 @@
 import { Event, ipcMain } from 'electron';
-import { Common } from '../../common/events';
+import Events from '@common/events';
 import App from '../App';
 
 export default class EventBus {
-  public static from(app: App) {
-    const e = new this(app);
+  public static from<T extends EventBus = EventBus>(app: App): T {
+    const e = new this(app) as T;
     for (const channel of e.events) {
       e.handle(channel);
     }
@@ -12,14 +12,14 @@ export default class EventBus {
   }
 
   public app: App;
-  public events: Common[] = [];
+  public events: Events[] = [];
 
-  public handle(channel: Common): void {
-    if (channel in this) {
-      ipcMain.on(channel, async (event: Event, data: any) => {
-        const fn = (this as any)[channel].bind(this);
-        const res = await fn(data);
-        event.sender.send(channel, res);
+  public handle(channel: Events): void {
+    if (this.events.includes(channel)) {
+      ipcMain.on(channel, async (_: Event, data: any) => {
+        if (channel in this) {
+          await (this as $AnyFixMe)[channel].bind(this)(data);
+        }
       });
     }
   }

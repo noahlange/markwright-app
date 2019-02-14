@@ -1,4 +1,7 @@
 node_modules
-dist/*
 build/*
+public/styles/*
+public/scripts/*
+public/workers/*
 !.gitkeep
+yarn-error.log
