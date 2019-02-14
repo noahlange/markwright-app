@@ -25,7 +25,11 @@ const empty = {
 };
 
 export default class ProjectEvents extends EventBus {
-  public events: Events[] = [Events.APP_OPEN, Events.APP_SAVE];
+  public events: Events[] = [
+    Events.APP_OPEN,
+    Events.APP_SAVE,
+    Events.APP_EXPORT_PDF
+  ];
 
   public constructor(app: App) {
     super(app);
@@ -77,6 +81,23 @@ export default class ProjectEvents extends EventBus {
           'utf8'
         );
       }
+    }
+  }
+
+  public async [Events.APP_EXPORT_PDF]() {
+    const wc = this.app.clients.find(c => c.getURL().endsWith('preview.html'));
+    const target = dialog.showSaveDialog({
+      filters: [{ name: 'PDF', extensions: ['pdf'] }]
+    });
+    if (wc && target) {
+      // fn needs to be bound
+      const printToPDF = promisify(wc.printToPDF).bind(wc);
+      const buffer = await printToPDF({
+        marginsType: 1, // no margins, leaves these up to the user
+        pageSize: 'Letter', // @todo
+        printBackground: true // always print CSS backgrounds
+      });
+      await promises.writeFile(target, buffer);
     }
   }
 }
