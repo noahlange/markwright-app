@@ -1,6 +1,8 @@
 {
   "name": "Markwright",
   "version": "0.7.0",
+  "author": "Noah Lange <noahrlange@gmail.com>",
+  "description": "dead-simple desktop publishing with markdown and sass",
   "main": "public/scripts/main.js",
   "devDependencies": {
     "@babel/core": "^7.2.2",
@@ -19,10 +21,10 @@
     "@types/react-router-dom": "^4.3.1",
     "autoprefixer": "^9.3.1",
     "babel-loader": "^8.0.5",
-    "concurrently": "^4.0.1",
     "cross-env": "^5.2.0",
+    "css-loader": "^1.0.1",
     "electron": "^4.0.4",
-    "electron-rebuild": "^1.8.2",
+    "electron-builder": "^20.38.5",
     "express": "^4.16.4",
     "file-loader": "^2.0.0",
     "postcss-loader": "^2.1.5",
@@ -33,13 +35,11 @@
     "typescript": "^3.3.3",
     "webpack": "^4.29.3",
     "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.14",
     "webpack-merge": "^4.2.1",
     "webpack-node-externals": "^1.7.2"
   },
   "dependencies": {
     "core-decorators": "^0.20.0",
-    "css-loader": "^1.0.1",
     "electron-devtools-installer": "^2.2.4",
     "hercule": "^4.1.1",
     "highlight.js": "^9.14.2",
@@ -48,7 +48,7 @@
     "line-column": "^1.0.2",
     "lodash": "^4.17.11",
     "markwright": "noahlange/markwright",
-    "monaco-editor": "^0.14.3",
+    "monaco-editor": "^0.15.6",
     "monaco-editor-webpack-plugin": "^1.7.0",
     "node-sass": "^4.9.3",
     "paper-size": "^1.1.0",
@@ -57,7 +57,6 @@
     "react-dev-server": "^0.6.2",
     "react-dom": "^16.6.3",
     "react-electron-web-view": "^2.0.1",
-    "react-hot-loader": "^4.6.5",
     "react-monaco-editor": "^0.18.0",
     "react-mosaic-component": "^2.0.2",
     "react-promise": "^2.0.3",
@@ -73,6 +72,32 @@
     "start": "electron .",
     "pretty": "prettier --write 'src/**/*.{ts,tsx}'",
     "check": "tsc",
-    "rebuild": "./tasks/sass.sh"
+    "rebuild": "./tasks/sass.sh",
+    "dist": "yarn run build && build"
+  },
+  "build": {
+    "appId": "com.noahlange.markwright",
+    "productName": "Markwright",
+    "directories": {
+      "output": "dist"
+    },
+    "fileAssociations": {
+      "ext": "mw",
+      "name": "Markwright document"
+    },
+    "files": [
+      "node_modules",
+      "public",
+      "package.json"
+    ],
+    "mac": {
+      "icon": "public/static/icon.icns",
+      "category": "public.app-category.graphics-design",
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "public/static/icon.ico"
+    }
   }
 }
