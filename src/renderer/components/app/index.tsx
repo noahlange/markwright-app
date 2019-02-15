@@ -6,8 +6,8 @@ import Events from '@common/events';
 import { ContentType, IProject } from '@common/types';
 import { ContentResponse } from '@main/events/Content';
 
-import Editor from '../editor';
 import Problems from '../problems';
+import Editor from '../tabs';
 
 type AppState = {
   mosaic: Panes | MosaicParent<Panes> | null;
@@ -116,10 +116,7 @@ export default class Markwright extends React.Component<{}, AppState> {
       };
       const panes = {
         [Panes.EDITOR]: () => (
-          <Editor
-            defaultValue={props.content}
-            onChange={this.on.changeContent}
-          />
+          <Editor value={props.content} onChange={this.on.changeContent} />
         ),
         [Panes.ISSUES]: () => <Problems data={props.errors} />,
         [Panes.PREVIEW]: () => (

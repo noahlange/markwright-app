@@ -1,115 +1,68 @@
-import { autobind } from 'core-decorators';
-import { Cancelable, debounce } from 'lodash';
-import * as Monaco from 'monaco-editor';
-import * as React from 'react';
-import MonacoEditor from 'react-monaco-editor';
+/**
+ * from Satya164's monaco boilerplate, released under the MIT license
+ * https://github.com/satya164/monaco-editor-boilerplate
+ */
 
 import { ContentType } from '@common/types';
 import { listen, unlisten } from '@renderer/utils/listen';
 
-type ContentHash = Record<ContentType, string>;
+import { autobind } from 'core-decorators';
+import * as monaco from 'monaco-editor';
+import React from 'react';
 
-type EditorProps = {
-  defaultValue: ContentHash | null;
-  onChange: (k: ContentType, v: string) => $AnyFixMe;
+type Props = {
+  files: { [path: string]: string };
+  path: ContentType;
+  // value: string;
+  onOpenPath?: (path: string) => any;
+  onChange: (value: string) => any;
+  lineNumbers?: 'on' | 'off';
+  wordWrap: 'off' | 'on' | 'wordWrapColumn' | 'bounded';
+  scrollBeyondLastLine?: boolean;
+  minimap?: {
+    enabled?: boolean;
+    maxColumn?: number;
+    renderCharacters?: boolean;
+    showSlider?: 'always' | 'mouseover';
+    side?: 'right' | 'left';
+  };
+  theme?: string;
 };
 
-type EditorState = {
-  initial: ContentHash;
-  content: ContentHash;
-  tab: ContentType;
+const languages: Record<ContentType, string> = {
+  [ContentType.CONTENT]: 'markdown',
+  [ContentType.STYLES]: 'scss',
+  [ContentType.METADATA]: 'json'
 };
 
-function matches<A extends ContentHash, B extends ContentHash>(
-  o1: A | null,
-  o2: B | null,
-  k: ContentType
-) {
-  return o1 && o2 && o1[k] === o2[k];
-}
-
-export default class Editor extends React.Component<EditorProps, EditorState> {
-  public static getDerivedStateFromProps(
-    nextProps: EditorProps,
-    prevState: EditorState
-  ) {
-    if (matches(nextProps.defaultValue, prevState.initial, prevState.tab)) {
-      return null;
-    } else {
-      return nextProps.defaultValue
-        ? {
-            content: nextProps.defaultValue,
-            initial: nextProps.defaultValue
-          }
-        : null;
+export default class Editor extends React.Component<Props> {
+  public static states = new Map();
+  public static removePath(path: string) {
+    // Remove editor states
+    Editor.states.delete(path);
+    // Remove associated models
+    const model = monaco.editor.getModels().find(m => m.uri.path === path);
+    if (model) {
+      model.dispose();
     }
   }
 
-  public editor!: Monaco.editor.IEditor;
+  public static renamePath(oldPath: string, newPath: string) {
+    const selection = Editor.states.get(oldPath);
 
-  public change: Record<ContentType, ((value: string) => any) & Cancelable> = {
-    [ContentType.CONTENT]: debounce(this.onChangeMarkdown, 125),
-    [ContentType.METADATA]: debounce(this.onChangeMetadata, 250),
-    [ContentType.STYLES]: debounce(this.onChangeSCSS, 500)
-  };
+    Editor.states.delete(oldPath);
+    Editor.states.set(newPath, selection);
 
-  public languages: Record<ContentType, string> = {
-    [ContentType.CONTENT]: 'markdown',
-    [ContentType.METADATA]: 'json',
-    [ContentType.STYLES]: 'scss'
-  };
-
-  public state: EditorState = {
-    content: {
-      [ContentType.STYLES]: '',
-      [ContentType.METADATA]: '{}',
-      [ContentType.CONTENT]: ''
-    },
-    initial: {
-      [ContentType.STYLES]: '',
-      [ContentType.METADATA]: '{}',
-      [ContentType.CONTENT]: ''
-    },
-    tab: ContentType.CONTENT
-  };
-
-  @autobind
-  public handleResize() {
-    this.editor.layout();
+    this.removePath(oldPath);
   }
 
-  @autobind
-  public onChangeSCSS(e: string) {
-    return this.onChange(e);
-  }
+  protected editor!: monaco.editor.ICodeEditor;
+  protected node!: HTMLDivElement;
+  protected subscription: monaco.IDisposable | null = null;
 
-  @autobind
-  public onChangeMetadata(e: string) {
-    return this.onChange(e);
-  }
-
-  @autobind
-  public onChangeMarkdown(e: string) {
-    return this.onChange(e);
-  }
-
-  @autobind
-  public onChange(e: string) {
-    this.setState(
-      {
-        content: {
-          ...this.state.content,
-          [this.state.tab]: e
-        }
-      },
-      () => {
-        this.props.onChange(this.state.tab, e);
-      }
-    );
-  }
-
-  @autobind
-  public editorWillMount(monaco: $AnyFixMe) {
+  public componentDidMount() {
+    const { path, files, ...rest } = this.props;
+    const value = files[path];
     monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
       allowComments: true,
       schemas: [
@@ -120,81 +73,152 @@ export default class Editor extends React.Component<EditorProps, EditorState> {
         }
       ]
     });
+    this.editor = monaco.editor.create(this.node, {
+      ...rest,
+      fontFamily: 'Liga Inconsolata',
+      fontLigatures: true,
+      fontSize: 15,
+      theme: 'vs-dark',
+      wordWrap: 'bounded'
+    });
+
+    (Object.keys(files) as ContentType[]).forEach(f =>
+      this.initializeFile(f, this.props.files[f])
+    );
+
+    this.openFile(path, value);
+
+    listen('resize', this.updateDimensions);
   }
 
   @autobind
-  public editorDidMount(editor: $AnyFixMe) {
-    const model = editor.getModel();
-    if (model) {
-      model.updateOptions({ tabSize: 2 });
-      this.editor = editor;
-      this.editor.focus();
-      this.editor.layout();
+  public updateDimensions() {
+    this.editor.layout();
+  }
+
+  public componentDidUpdate(prevProps: Props) {
+    const { path, ...rest } = this.props;
+    const value = this.props.files[path];
+
+    this.editor.updateOptions(rest);
+
+    if (path !== prevProps.path) {
+      Editor.states.set(prevProps.path, this.editor.saveViewState());
+
+      this.openFile(path, value);
+    } else {
+      const m = this.editor.getModel();
+      if (m && value !== m.getValue()) {
+        const model = this.editor.getModel();
+        if (model && value !== m.getValue()) {
+          model.pushEditOperations(
+            [],
+            [
+              {
+                range: model.getFullModelRange(),
+                text: value
+              }
+            ],
+            undefined as $AnyFixMe
+          );
+        }
+      }
     }
   }
 
-  @autobind
-  public focus() {
-    this.editor.focus();
-  }
-
-  public componentDidMount() {
-    const tabs: ContentType[] = [
-      ContentType.CONTENT,
-      ContentType.STYLES,
-      ContentType.METADATA
-    ];
-    listen('resize', this.handleResize);
-    listen('keypress', e => {
-      if (e.ctrlKey && e.code === 'Tab') {
-        const idx = (tabs.indexOf(this.state.tab) + 1) % tabs.length;
-        this.change[this.state.tab].flush();
-        this.setState({ tab: tabs[idx] });
-      }
-    });
-  }
-
   public componentWillUnmount() {
-    unlisten('keypress', 'resize');
+    if (this.editor) {
+      this.editor.dispose();
+      unlisten('resize');
+    }
   }
 
-  public tab(tab: ContentType): () => void {
-    return () => this.setState({ tab });
+  public clearSelection() {
+    const selection = this.editor.getSelection();
+    if (selection) {
+      this.editor.setSelection(
+        new monaco.Selection(
+          selection.startLineNumber,
+          selection.startColumn,
+          selection.startLineNumber,
+          selection.startColumn
+        )
+      );
+    }
   }
 
   public render() {
     return (
       <div
         id="monaco-container"
-        style={{ width: '100%' }}
-        onMouseOver={this.focus}
-      >
-        <div className={`tabs ${this.state.tab}`}>
-          <button className="content" onClick={this.tab(ContentType.CONTENT)}>
-            Content (Markdown)
-          </button>
-          <button className="styles" onClick={this.tab(ContentType.STYLES)}>
-            Styles (SCSS)
-          </button>
-          <button className="metadata" onClick={this.tab(ContentType.METADATA)}>
-            Metadata (JSON)
-          </button>
-        </div>
-        <MonacoEditor
-          theme="vs-dark"
-          options={{
-            fontFamily: 'Liga Inconsolata',
-            fontLigatures: true,
-            fontSize: 15,
-            wordWrap: 'bounded'
-          }}
-          editorWillMount={this.editorWillMount}
-          editorDidMount={this.editorDidMount}
-          language={this.languages[this.state.tab]}
-          onChange={this.change[this.state.tab]}
-          value={this.state.content[this.state.tab]}
-        />
-      </div>
+        style={{ height: '100%', width: '100%' }}
+        ref={(r: HTMLDivElement) => (this.node = r)}
+        className={this.props.theme}
+      />
     );
+  }
+
+  @autobind
+  protected initializeFile(path: ContentType, value: string) {
+    let model = monaco.editor.getModels().find(m => m.uri.path === path);
+
+    if (model) {
+      // If a model exists, we need to update it's value
+      // This is needed because the content for the file might have been modified externally
+      // Use `pushEditOperations` instead of `setValue` or `applyEdits` to preserve undo stack
+      model.pushEditOperations(
+        [],
+        [
+          {
+            range: model.getFullModelRange(),
+            text: value
+          }
+        ],
+        undefined as $AnyFixMe
+      );
+    } else {
+      model = monaco.editor.createModel(
+        value,
+        languages[path],
+        monaco.Uri.from({ path, scheme: 'mw' })
+      );
+      model.updateOptions({
+        insertSpaces: true,
+        tabSize: 2
+      });
+    }
+  }
+
+  @autobind
+  protected openFile(path: ContentType, value: string = '') {
+    this.initializeFile(path, value);
+
+    const model = monaco.editor.getModels().find(m => m.uri.path === path);
+
+    if (model) {
+      this.editor.setModel(model);
+
+      // Restore the editor state for the file
+      const editorState = Editor.states.get(path);
+
+      if (editorState) {
+        this.editor.restoreViewState(editorState);
+      }
+
+      this.editor.focus();
+
+      // Subscribe to change in value so we can notify the parent
+      if (this.subscription) {
+        this.subscription.dispose();
+      }
+
+      this.subscription = model.onDidChangeContent(() => {
+        const submodel = this.editor.getModel();
+        if (submodel) {
+          const subvalue = model.getValue();
+          this.props.onChange(subvalue);
+        }
+      });
+    }
   }
 }
