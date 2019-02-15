@@ -60,7 +60,6 @@
     "react-dev-server": "^0.6.2",
     "react-dom": "^16.6.3",
     "react-electron-web-view": "^2.0.1",
-    "react-monaco-editor": "^0.18.0",
     "react-mosaic-component": "^2.0.2",
     "react-promise": "^2.0.3",
     "simple-markdown": "^0.4.1",
