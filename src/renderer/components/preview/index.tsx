@@ -4,7 +4,9 @@ import cache from 'js-cache';
 import Markwright from 'markwright';
 import React from 'react';
 import { proxy } from 'workly/index';
+
 import { styles } from '../../themes/markwright';
+import PanZoom from '../pan-zoom';
 
 type PreviewProps = {
   base: string;
@@ -33,29 +35,31 @@ export default class Preview extends React.Component<PreviewProps> {
       <main className="preview">
         <style type="text/css">{this.themeCSS}</style>
         <style type="text/css">{this.props.data[ContentType.STYLES]}</style>
-        <Markwright
-          config={{
-            columns: this.metadata('columns', 1),
-            highlight: async (str: string, lang: string) => {
-              const key = `${lang}::${str}`;
-              const has = cache.get(key);
-              if (has) {
-                return has;
-              } else {
-                const res = await this.highlight(str, lang);
-                cache.set(key, res);
-                return res;
+        <PanZoom>
+          <Markwright
+            config={{
+              columns: this.metadata('columns', 1),
+              highlight: async (str: string, lang: string) => {
+                const key = `${lang}::${str}`;
+                const has = cache.get(key);
+                if (has) {
+                  return has;
+                } else {
+                  const res = await this.highlight(str, lang);
+                  cache.set(key, res);
+                  return res;
+                }
+              },
+              manual: this.metadata('manual', true),
+              page: {
+                height: 8.5 * 96,
+                width: 11 * 96
               }
-            },
-            manual: this.metadata('manual', true),
-            page: {
-              height: 8.5 * 96,
-              width: 11 * 96
-            }
-          }}
-          value={this.props.data[ContentType.CONTENT]}
-          page={1}
-        />
+            }}
+            value={this.props.data[ContentType.CONTENT]}
+            page={1}
+          />
+        </PanZoom>
       </main>
     );
   }

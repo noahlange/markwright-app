@@ -32,13 +32,13 @@
     "sass-loader": "^7.0.3",
     "source-map-loader": "^0.2.3",
     "style-loader": "^0.23.1",
+    "tslint": "^5.12.1",
+    "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.3.3",
     "webpack": "^4.29.3",
     "webpack-cli": "^3.1.2",
     "webpack-merge": "^4.2.1",
-    "webpack-node-externals": "^1.7.2",
-    "tslint": "^5.12.1",
-    "tslint-config-prettier": "^1.18.0"
+    "webpack-node-externals": "^1.7.2"
   },
   "dependencies": {
     "core-decorators": "^0.20.0",
@@ -53,6 +53,7 @@
     "monaco-editor": "^0.15.6",
     "monaco-editor-webpack-plugin": "^1.7.0",
     "node-sass": "^4.9.3",
+    "panzoom": "^7.1.2",
     "paper-size": "^1.1.0",
     "pluralize": "^7.0.0",
     "react": "^16.6.3",
