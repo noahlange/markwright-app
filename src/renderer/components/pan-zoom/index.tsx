@@ -4,12 +4,21 @@ import React from 'react';
 
 export default class extends React.Component {
   public handler!: PanZoom;
+  public el!: HTMLDivElement;
 
   @autobind
   public ref(el: HTMLDivElement) {
-    this.handler = panzoom(el, {
-      beforeWheel: e => !e.altKey
+    this.el = el;
+    this.handler = panzoom(this.el, {
+      beforeWheel: e => !e.altKey,
+      maxZoom: 2.0,
+      minZoom: 0.1
     });
+  }
+
+  @autobind
+  public focus() {
+    this.el.focus();
   }
 
   public componentWillUnmount() {
@@ -19,7 +28,8 @@ export default class extends React.Component {
   public render() {
     return (
       <div
-        style={{ width: '100%', height: '100%', outline: 'none' }}
+        onMouseOver={this.focus}
+        style={{ width: '100%', height: '100%' }}
         ref={this.ref}
       >
         {this.props.children}
