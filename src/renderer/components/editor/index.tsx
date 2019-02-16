@@ -115,20 +115,17 @@ export default class Editor extends React.Component<Props> {
     } else {
       const m = this.editor.getModel();
       if (m && value !== m.getValue()) {
-        const model = this.editor.getModel();
-        if (model && value !== m.getValue()) {
-          model.pushEditOperations(
+          m.pushEditOperations(
             [],
             [
               {
                 forceMoveMarkers: true,
-                range: new monaco.Range(1, 0, 1, 0),
+                range: m.getFullModelRange(),
                 text: value
               }
             ],
             () => null
           );
-        }
       }
     }
   }
@@ -165,7 +162,7 @@ export default class Editor extends React.Component<Props> {
         [
           {
             forceMoveMarkers: true,
-            range: new monaco.Range(1, 0, 1, 0),
+            range: model.getFullModelRange(),
             text: value
           }
         ],
