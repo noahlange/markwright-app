@@ -96,6 +96,13 @@ export default class Editor extends React.Component<Props> {
     this.editor.layout();
   }
 
+  @autobind
+  public focus() {
+    if (!this.editor.hasWidgetFocus) {
+      this.editor.focus();
+    }
+  }
+
   public componentDidUpdate(prevProps: Props) {
     const { path, ...rest } = this.props;
     const value = this.props.files[path];
@@ -151,6 +158,7 @@ export default class Editor extends React.Component<Props> {
     return (
       <div
         id="monaco-container"
+        onMouseOver={this.focus}
         style={{ height: '100%', width: '100%' }}
         ref={(r: HTMLDivElement) => (this.node = r)}
         className={this.props.theme}
