@@ -10,9 +10,9 @@ import { listen } from '@renderer/utils/listen';
 import Problems from '../problems';
 import Editor from '../tabs';
 
-type AppState = {
+type AppState = IProject & {
   mosaic: Panes | MosaicParent<Panes> | null;
-  project: IProject;
+  load: number;
 };
 
 enum Panes {
@@ -32,6 +32,19 @@ export default class Markwright extends React.Component<{}, AppState> {
   };
 
   public state: AppState = {
+    content: {
+      [ContentType.CONTENT]: '',
+      [ContentType.STYLES]: '',
+      [ContentType.METADATA]: '{}'
+    },
+    directory: '',
+    errors: {
+      [ContentType.CONTENT]: [],
+      [ContentType.STYLES]: [],
+      [ContentType.METADATA]: []
+    },
+    filename: 'Untitled.mw',
+    load: Date.now(),
     mosaic: {
       direction: 'row',
       first: {
@@ -41,28 +54,12 @@ export default class Markwright extends React.Component<{}, AppState> {
         splitPercentage: 80
       },
       second: Panes.PREVIEW
-    },
-    project: {
-      content: {
-        [ContentType.CONTENT]: '',
-        [ContentType.STYLES]: '',
-        [ContentType.METADATA]: '{}'
-      },
-      directory: '',
-      errors: {
-        [ContentType.CONTENT]: [],
-        [ContentType.STYLES]: [],
-        [ContentType.METADATA]: []
-      },
-      filename: 'Untitled.mw'
     }
   };
 
   public on = {
     changeContent: async (type: ContentType, value: string) => {
-      if (this.state.project) {
-        events.send(Events.APP_CONTENT_PROCESS, { type, value });
-      }
+      events.send(Events.APP_CONTENT_PROCESS, { type, value });
     },
     changeMosaic: async (mosaic: Panes | MosaicParent<Panes> | null) => {
       this.setState({ mosaic });
@@ -77,7 +74,7 @@ export default class Markwright extends React.Component<{}, AppState> {
     ];
 
     events.on(Events.APP_LOAD, async (_, project: IProject) => {
-      this.setState({ project });
+      this.setState({ ...project, load: Date.now() });
       for (const type of types) {
         events.send(Events.APP_CONTENT_PROCESS, {
           type,
@@ -87,9 +84,12 @@ export default class Markwright extends React.Component<{}, AppState> {
     });
 
     events.on(Events.APP_CONTENT_PROCESSED, (_, res: ContentResponse) => {
-      const project = this.state.project;
-      project.errors[res.type] = res.errors;
-      this.setState({ project });
+      this.setState({
+        errors: {
+          ...this.state.errors,
+          [res.type]: res.errors
+        }
+      });
     });
 
     events.send(Events.APP_CONNECTED);
@@ -104,50 +104,52 @@ export default class Markwright extends React.Component<{}, AppState> {
   }
 
   public render() {
-    if (this.state.project) {
-      const props = {
-        content: { ...this.state.project.content },
-        errors: { ...this.state.project.errors }
-      };
-      const panes = {
-        [Panes.EDITOR]: () => (
-          <Editor value={props.content} onChange={this.on.changeContent} />
-        ),
-        [Panes.ISSUES]: () => <Problems data={props.errors} />,
-        [Panes.PREVIEW]: () => (
-          <WebView
-            blinkfeatures="OverlayScrollbars"
-            src={'preview.html'}
-            preload={'./scripts/preload.js'}
-          />
-        )
-      };
-      return (
-        <>
-          <div className="flex">
-            <div className="editor" style={{ pointerEvents: 'none' }}>
-              <header>{this.state.project.filename}</header>
-            </div>
-            <TypedMosaic
-              className=""
-              renderTile={(e, path) => (
-                <TypedWindow
-                  path={path}
-                  toolbarControls={[]}
-                  title={Markwright.titles[e]}
-                  // need to pass this so the mosaic will detect updates to children
-                  {...props}
-                >
-                  {panes[e]()}
-                </TypedWindow>
-              )}
-              value={this.state.mosaic}
-              onChange={this.on.changeMosaic}
-            />
+    const props = {
+      content: { ...this.state.content },
+      errors: { ...this.state.errors },
+      load: this.state.load
+    };
+    const panes = {
+      [Panes.EDITOR]: () => (
+        <Editor
+          timestamp={props.load}
+          value={props.content}
+          onChange={this.on.changeContent}
+        />
+      ),
+      [Panes.ISSUES]: () => <Problems data={props.errors} />,
+      [Panes.PREVIEW]: () => (
+        <WebView
+          blinkfeatures="OverlayScrollbars"
+          src={'preview.html'}
+          preload={'./scripts/preload.js'}
+        />
+      )
+    };
+    return (
+      <>
+        <div className="flex">
+          <div className="editor" style={{ pointerEvents: 'none' }}>
+            <header>{this.state.filename}</header>
           </div>
-        </>
-      );
-    }
-    return null;
+          <TypedMosaic
+            className=""
+            renderTile={(e, path) => (
+              <TypedWindow
+                path={path}
+                toolbarControls={[]}
+                title={Markwright.titles[e]}
+                // need to pass this so the mosaic will detect updates to children
+                {...props}
+              >
+                {panes[e]()}
+              </TypedWindow>
+            )}
+            value={this.state.mosaic}
+            onChange={this.on.changeMosaic}
+          />
+        </div>
+      </>
+    );
   }
 }

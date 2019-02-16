@@ -10,10 +10,12 @@ type ContentHash = Record<ContentType, string>;
 
 type EditorProps = {
   value: ContentHash;
+  timestamp: number;
   onChange: (k: ContentType, v: string) => $AnyFixMe;
 };
 
 type EditorState = {
+  timestamp: number;
   files: ContentHash;
   tab: ContentType;
 };
@@ -38,14 +40,21 @@ export default class TabbedEditor extends React.Component<
     nextProps: EditorProps,
     prevState: EditorState
   ) {
-    const tab = prevState.tab;
-    if (nextProps.value[tab] === prevState.files[tab]) {
-      return null;
-    } else {
-      return {
-        files: nextProps.value
-      };
+    if (nextProps.timestamp > prevState.timestamp) {
+      let changed = false;
+      for (const tab of TabbedEditor.tabs) {
+        if (nextProps.value[tab] !== prevState.files[tab]) {
+          changed = true;
+        }
+      }
+      return changed
+        ? {
+            files: nextProps.value,
+            timestamp: nextProps.timestamp
+          }
+        : null;
     }
+    return null;
   }
 
   public change: Record<ContentType, ((value: string) => any) & Cancelable> = {
@@ -56,7 +65,8 @@ export default class TabbedEditor extends React.Component<
 
   public state: EditorState = {
     files: this.props.value || empty,
-    tab: ContentType.CONTENT
+    tab: ContentType.CONTENT,
+    timestamp: Date.now()
   };
 
   @autobind
