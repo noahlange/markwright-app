@@ -19,6 +19,18 @@ module.exports = merge(base, {
   module: {
     rules: [
       {
+         test: /\.(woff|woff2|eot|ttf|otf)$/,
+         use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: 'styles/[name].[ext]',
+              publicPath: '../'
+            }
+           }
+         ]
+      },
+      {
         test: /\.(scss|css)$/,
         use: [
           CSS.loader,

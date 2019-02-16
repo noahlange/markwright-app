@@ -15,11 +15,11 @@ Object.assign(window, {
     getWorkerUrl(_: $AnyFixMe, label: string) {
       switch (label) {
         case 'scss':
-          return './scripts/css.worker.js';
+          return 'workers/css.worker.js';
         case 'json':
-          return './scripts/json.worker.js';
+          return 'workers/json.worker.js';
         default:
-          return './scripts/editor.worker.js';
+          return 'workers/editor.worker.js';
       }
     }
   },

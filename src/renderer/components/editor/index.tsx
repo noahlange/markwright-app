@@ -75,7 +75,7 @@ export default class Editor extends React.Component<Props> {
     });
     this.editor = monaco.editor.create(this.node, {
       ...rest,
-      fontFamily: 'Liga Inconsolata',
+      fontFamily: 'Fira Code',
       fontLigatures: true,
       fontSize: 15,
       theme: 'vs-dark',
