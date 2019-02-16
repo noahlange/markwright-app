@@ -29,6 +29,7 @@ export default class ProjectEvents extends EventBus {
   public events: Events[] = [
     Events.APP_OPEN,
     Events.APP_SAVE,
+    Events.APP_FILE,
     Events.APP_EXPORT_PDF
   ];
 
@@ -40,20 +41,13 @@ export default class ProjectEvents extends EventBus {
   public async [Events.APP_OPEN](): Promise<IProject | void> {
     const choices = dialog.showOpenDialog({
       filters: [
-        { name: 'Markwright', extensions: ['mw'] },
+        { name: 'Markwright document', extensions: ['mw'] },
         { name: 'All Files', extensions: ['*'] }
       ]
     });
     const filename = choices && choices.shift();
     if (filename) {
-      const file = await promises.readFile(filename, 'utf8');
-      this.app.project = {
-        ...empty,
-        content: parse(file),
-        directory: dirname(filename),
-        filename: basename(filename)
-      };
-      this.app.emit(Events.APP_LOAD, this.app.project);
+      await this[Events.APP_FILE](filename);
     }
   }
 
@@ -88,7 +82,7 @@ export default class ProjectEvents extends EventBus {
   public async [Events.APP_EXPORT_PDF]() {
     const wc = this.app.clients.find(c => c.getURL().endsWith('preview.html'));
     const target = dialog.showSaveDialog({
-      filters: [{ name: 'PDF', extensions: ['pdf'] }]
+      filters: [{ name: 'PDF Document', extensions: ['pdf'] }]
     });
     if (wc && target) {
       // fn needs to be bound
@@ -100,5 +94,16 @@ export default class ProjectEvents extends EventBus {
       });
       await promises.writeFile(target, buffer);
     }
+  }
+
+  public async [Events.APP_FILE](filename: string) {
+    const file = await promises.readFile(filename, 'utf8');
+    this.app.project = {
+      ...empty,
+      content: parse(file),
+      directory: dirname(filename),
+      filename: basename(filename)
+    };
+    this.app.emit(Events.APP_LOAD, this.app.project);
   }
 }

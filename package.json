@@ -1,6 +1,6 @@
 {
   "name": "Markwright",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "author": "Noah Lange <noahrlange@gmail.com>",
   "description": "dead-simple desktop publishing with markdown and sass",
   "main": "public/scripts/main.js",

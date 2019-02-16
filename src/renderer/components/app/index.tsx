@@ -106,6 +106,7 @@ export default class Markwright extends React.Component<{}, AppState> {
     });
 
     events.send(Events.APP_CONNECTED);
+    events.send(Events.APP_READY_EDITOR);
   }
 
   public render() {

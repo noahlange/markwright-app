@@ -2,6 +2,7 @@ enum Events {
   DID_FINISH_LOAD = 'did-finish-load',
   WINDOW_CLOSED = 'closed',
   WINDOW_ALL_CLOSED = 'window-all-closed',
+  OPEN_FILE = 'open-file',
 
   APP_READY = 'ready',
   APP_ACTIVATE = 'activate',
@@ -15,6 +16,7 @@ enum Events {
   APP_READY_PREVIEW = 'app-preview-ready',
 
   APP_LOAD = 'app-project-load',
+  APP_FILE = 'app-project-file',
   APP_OPEN = 'app-project-open',
   APP_SAVE = 'app-project-save',
   APP_SAVE_AS = 'app-project-save-as',

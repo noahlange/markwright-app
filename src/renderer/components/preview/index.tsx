@@ -5,6 +5,7 @@ import Markwright from 'markwright';
 import React from 'react';
 import { proxy } from 'workly/index';
 
+import Events from '@common/events';
 import { styles } from '../../themes/markwright';
 import DomTooltip from '../dom-tooltip';
 import PanZoom from '../pan-zoom';
@@ -29,6 +30,11 @@ export default class Preview extends React.Component<PreviewProps> {
 
   public get themeCSS() {
     return styles(this.props.data[ContentType.METADATA], 8.5, 11);
+  }
+
+  public componentDidMount() {
+    events.send(Events.APP_CONNECTED);
+    events.send(Events.APP_READY_PREVIEW);
   }
 
   public render() {

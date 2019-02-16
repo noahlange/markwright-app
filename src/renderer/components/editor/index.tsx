@@ -111,7 +111,6 @@ export default class Editor extends React.Component<Props> {
 
     if (path !== prevProps.path) {
       Editor.states.set(prevProps.path, this.editor.saveViewState());
-
       this.openFile(path, value);
     } else {
       const m = this.editor.getModel();
@@ -122,11 +121,12 @@ export default class Editor extends React.Component<Props> {
             [],
             [
               {
-                range: model.getFullModelRange(),
+                forceMoveMarkers: true,
+                range: new monaco.Range(1, 0, 1, 0),
                 text: value
               }
             ],
-            undefined as $AnyFixMe
+            () => null
           );
         }
       }
@@ -137,20 +137,6 @@ export default class Editor extends React.Component<Props> {
     if (this.editor) {
       this.editor.dispose();
       unlisten('resize');
-    }
-  }
-
-  public clearSelection() {
-    const selection = this.editor.getSelection();
-    if (selection) {
-      this.editor.setSelection(
-        new monaco.Selection(
-          selection.startLineNumber,
-          selection.startColumn,
-          selection.startLineNumber,
-          selection.startColumn
-        )
-      );
     }
   }
 
@@ -178,11 +164,12 @@ export default class Editor extends React.Component<Props> {
         [],
         [
           {
-            range: model.getFullModelRange(),
+            forceMoveMarkers: true,
+            range: new monaco.Range(1, 0, 1, 0),
             text: value
           }
         ],
-        undefined as $AnyFixMe
+        () => null
       );
     } else {
       model = monaco.editor.createModel(

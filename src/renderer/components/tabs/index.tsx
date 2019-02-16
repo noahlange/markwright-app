@@ -9,7 +9,7 @@ import Editor from '../editor';
 type ContentHash = Record<ContentType, string>;
 
 type EditorProps = {
-  value: ContentHash | null;
+  value: ContentHash;
   onChange: (k: ContentType, v: string) => $AnyFixMe;
 };
 
@@ -33,6 +33,21 @@ export default class TabbedEditor extends React.Component<
     ContentType.STYLES,
     ContentType.METADATA
   ];
+
+  public static getDerivedStateFromProps(
+    nextProps: EditorProps,
+    prevState: EditorState
+  ) {
+    const tab = prevState.tab;
+    if (nextProps.value[tab] === prevState.files[tab]) {
+      return null;
+    } else {
+      return {
+        files: nextProps.value,
+        tab: prevState.tab
+      };
+    }
+  }
 
   public change: Record<ContentType, ((value: string) => any) & Cancelable> = {
     [ContentType.CONTENT]: debounce(this.onChange(ContentType.CONTENT), 125),

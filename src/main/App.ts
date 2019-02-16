@@ -30,12 +30,19 @@ type AppSettings = {
   basedir: string;
 };
 
+enum Clients {
+  NONE,
+  ONE,
+  BOTH
+}
+
 export default class App {
   public window: BrowserWindow | null = null;
   public clients: WebContents[] = [];
   public electron: ElectronApp;
   public basedir: string = homedir();
   public version: string = '0.1.0';
+  public opening: string | null = null;
 
   public project!: IProject;
   public events!: {
@@ -92,16 +99,21 @@ export default class App {
         window(this)
       ])
     );
+
     await installExtension(REACT_DEVELOPER_TOOLS);
-    await this.createWindow();
 
     ipcMain.on(
       Events.APP_EVENT,
-      (_: Electron.Event, c: Events, args: any[]) => {
+      async (_: Electron.Event, c: Events, args: Array<unknown>) => {
         if (c === Events.APP_CONNECTED) {
           this.clients.push(_.sender);
         }
-        this.emit(c, ...args);
+        // need to wait for editor and preview pane
+        if (this.opening && this.clients.length === Clients.BOTH) {
+          await this.emit(Events.APP_FILE, this.opening);
+          this.opening = null;
+        }
+        await this.emit(c, ...args);
       }
     );
 
@@ -109,5 +121,32 @@ export default class App {
       content: MakeContent.from<MakeContent>(this),
       project: MakeProject.from<MakeProject>(this)
     };
+
+    this.electron.on(Events.OPEN_FILE, async (e, path) => {
+      // wait for clients to connect
+      e.preventDefault();
+      if (this.window === null) {
+        this.opening = path;
+        await this.createWindow();
+      }
+    });
+
+    this.electron.on(Events.WINDOW_ALL_CLOSED, async () => {
+      // On OS X it is common for applications and their menu bar
+      // to stay active until the user quits explicitly with Cmd + Q
+      if (process.platform !== 'darwin') {
+        this.electron.quit();
+      }
+    });
+
+    this.electron.on(Events.APP_ACTIVATE, () => {
+      // On OS X it's common to re-create a window in the app when the
+      // dock icon is clicked and there are no other windows open.
+      if (this.window === null) {
+        this.createWindow();
+      }
+    });
+
+    await this.createWindow();
   }
 }
