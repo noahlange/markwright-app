@@ -25,17 +25,27 @@ const empty = {
   filename: null
 };
 
-export default class ProjectEvents extends EventBus {
+type Dimensions = {
+  width: number;
+  height: number;
+};
+
+export default class ApplicationEvents extends EventBus {
   public events: Events[] = [
     Events.APP_OPEN,
     Events.APP_SAVE,
     Events.APP_FILE,
-    Events.APP_EXPORT_PDF
+    Events.APP_EXPORT_PDF,
+    Events.WINDOW_RESIZED
   ];
 
   public constructor(app: App) {
     super(app);
     app.project = { ...empty };
+  }
+
+  public async [Events.WINDOW_RESIZED](dimensions: Dimensions) {
+    this.app.store.set('window', dimensions);
   }
 
   public async [Events.APP_OPEN](): Promise<IProject | void> {

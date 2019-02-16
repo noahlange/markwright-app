@@ -6,14 +6,15 @@ export default function(app: App): MenuItemConstructorOptions {
   return {
     label: 'File',
     submenu: [
+      // New
       {
-        accelerator: 'Cmd+O',
+        accelerator: 'CmdOrCtrl+O',
         click: () => app.emit(Events.APP_OPEN),
         label: 'Open',
         role: 'open'
       },
       {
-        accelerator: 'Cmd+S',
+        accelerator: 'CmdOrCtrl+S',
         click: () => app.emit(Events.APP_SAVE),
         label: 'Save',
         role: 'save'
@@ -24,8 +25,9 @@ export default function(app: App): MenuItemConstructorOptions {
       //   accelerator: 'Cmd+Shift+S',
       //   click: () => app.emit(Events.APP_SAVE_AS)
       // },
+      { role: 'separator' },
       {
-        accelerator: 'Cmd+Shift+E',
+        accelerator: 'CmdOrCtrl+E',
         click: () => app.emit(Events.APP_EXPORT_PDF),
         label: 'Export to PDF',
         role: 'print'

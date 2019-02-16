@@ -3,11 +3,14 @@ import {
   BrowserWindow,
   ipcMain,
   Menu,
+  MenuItemConstructorOptions,
   WebContents
 } from 'electron';
 import installExtension, {
   REACT_DEVELOPER_TOOLS
 } from 'electron-devtools-installer';
+
+import Store from 'electron-store';
 
 import { homedir, platform } from 'os';
 import { resolve } from 'path';
@@ -16,8 +19,8 @@ import { format } from 'url';
 import Events from '@common/events';
 import { IProject } from '@common/types';
 
-import MakeContent from './events/Content';
-import MakeProject from './events/Project';
+import EventsApplication from './events/Application';
+import EventsContent from './events/Content';
 
 import edit from './menu/edit';
 import file from './menu/file';
@@ -41,13 +44,15 @@ export default class App {
   public clients: WebContents[] = [];
   public electron: ElectronApp;
   public basedir: string = homedir();
+  public platform: string = platform();
   public version: string = '0.1.0';
   public opening: string | null = null;
+  public store = new Store();
 
   public project!: IProject;
   public events!: {
-    project: MakeProject;
-    content: MakeContent;
+    application: EventsApplication;
+    content: EventsContent;
   };
 
   public constructor(settings: AppSettings) {
@@ -58,10 +63,10 @@ export default class App {
   public async createWindow() {
     this.window = new BrowserWindow({
       backgroundColor: platform() === 'darwin' ? undefined : '#191919',
-      height: 900,
+      height: this.store.get('window.height', 800),
       titleBarStyle: 'hidden',
       vibrancy: 'dark',
-      width: 1600
+      width: this.store.get('window.width', 1280)
     });
 
     this.window.loadURL(
@@ -97,7 +102,7 @@ export default class App {
         edit(this),
         view(this),
         window(this)
-      ])
+      ].filter(m => !!m) as MenuItemConstructorOptions[])
     );
 
     await installExtension(REACT_DEVELOPER_TOOLS);
@@ -118,8 +123,8 @@ export default class App {
     );
 
     this.events = {
-      content: MakeContent.from<MakeContent>(this),
-      project: MakeProject.from<MakeProject>(this)
+      application: EventsApplication.from<EventsApplication>(this),
+      content: EventsContent.from<EventsContent>(this)
     };
 
     this.electron.on(Events.OPEN_FILE, async (e, path) => {

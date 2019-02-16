@@ -43,8 +43,7 @@ export default class TabbedEditor extends React.Component<
       return null;
     } else {
       return {
-        files: nextProps.value,
-        tab: prevState.tab
+        files: nextProps.value
       };
     }
   }

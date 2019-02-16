@@ -6,6 +6,7 @@ import Events from '@common/events';
 import { ContentType, IProject } from '@common/types';
 import { ContentResponse } from '@main/events/Content';
 
+import { listen } from '@renderer/utils/listen';
 import Problems from '../problems';
 import Editor from '../tabs';
 
@@ -60,21 +61,7 @@ export default class Markwright extends React.Component<{}, AppState> {
   public on = {
     changeContent: async (type: ContentType, value: string) => {
       if (this.state.project) {
-        const { project } = this.state;
-        this.setState(
-          {
-            project: {
-              ...project,
-              content: {
-                ...project.content,
-                [type]: value
-              }
-            }
-          },
-          () => {
-            events.send(Events.APP_CONTENT_PROCESS, { type, value });
-          }
-        );
+        events.send(Events.APP_CONTENT_PROCESS, { type, value });
       }
     },
     changeMosaic: async (mosaic: Panes | MosaicParent<Panes> | null) => {
@@ -107,6 +94,13 @@ export default class Markwright extends React.Component<{}, AppState> {
 
     events.send(Events.APP_CONNECTED);
     events.send(Events.APP_READY_EDITOR);
+
+    listen('resize', _ => {
+      events.send(Events.WINDOW_RESIZED, {
+        height: window.outerHeight,
+        width: window.outerWidth
+      });
+    });
   }
 
   public render() {

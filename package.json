@@ -45,6 +45,7 @@
   "dependencies": {
     "core-decorators": "^0.20.0",
     "electron-devtools-installer": "^2.2.4",
+    "electron-store": "^2.0.0",
     "firacode": "^1.205.0",
     "hercule": "^4.1.1",
     "highlight.js": "^9.14.2",

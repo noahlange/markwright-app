@@ -2,6 +2,7 @@ enum Events {
   DID_FINISH_LOAD = 'did-finish-load',
   WINDOW_CLOSED = 'closed',
   WINDOW_ALL_CLOSED = 'window-all-closed',
+  WINDOW_RESIZED = 'app-window-resize',
   OPEN_FILE = 'open-file',
 
   APP_READY = 'ready',
