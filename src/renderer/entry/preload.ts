@@ -1,6 +1,6 @@
 import Events from '@common/events';
 import { ipcRenderer as ipc } from 'electron';
-import { homedir } from 'os';
+import { homedir, platform } from 'os';
 
 const on = (event: string, callback: $AnyFixMe) => ipc.on(event, callback);
 const once = (event: string, callback: $AnyFixMe) => ipc.once(event, callback);
@@ -29,5 +29,6 @@ Object.assign(window, {
     once,
     send
   },
-  homedir
+  homedir,
+  platform
 });

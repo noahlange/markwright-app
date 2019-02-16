@@ -1,5 +1,15 @@
 @import url('~react-mosaic-component/react-mosaic-component.css');
 
+@font-face {
+  font-family: 'Liga Inconsolata';
+  src: url('/static/LigaInconsolata-Regular.ttf');
+}
+@font-face {
+  font-family: 'Liga Inconsolata';
+  font-weight: bold;
+  src: url('/static/LigaInconsolata-Bold.ttf');
+}
+
 :root {
   --mono-stack: 'Liga Inconsolata', monospace;
   --sans-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
@@ -172,15 +182,6 @@ code {
   }
 }
 
-#react-root {
-  margin-top: -2rem;
-}
-
-#grab-bar {
-  height: 1.5rem;
-  -webkit-app-region: drag;
-}
-
 .preview {
   background: transparent;
   overflow: hidden;
@@ -290,4 +291,20 @@ header {
   font-size: small;
   padding: 1rem;
   line-height: 1.5;
+}
+
+body.darwin {
+  #react-root {
+    margin-top: -2rem;
+  }
+  #grab-bar {
+    height: 1.5rem;
+    -webkit-app-region: drag;
+  }
+}
+
+body.win32 {
+  #grab-bar {
+    display: none;
+  }
 }

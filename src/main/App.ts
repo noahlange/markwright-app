@@ -9,7 +9,7 @@ import installExtension, {
   REACT_DEVELOPER_TOOLS
 } from 'electron-devtools-installer';
 
-import { homedir } from 'os';
+import { homedir, platform } from 'os';
 import { resolve } from 'path';
 import { format } from 'url';
 
@@ -50,10 +50,11 @@ export default class App {
 
   public async createWindow() {
     this.window = new BrowserWindow({
-      height: 800,
+      backgroundColor: platform() === 'darwin' ? undefined : '#191919',
+      height: 900,
       titleBarStyle: 'hidden',
       vibrancy: 'dark',
-      width: 1280
+      width: 1600
     });
 
     this.window.loadURL(

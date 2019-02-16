@@ -130,7 +130,7 @@ export default class Markwright extends React.Component<{}, AppState> {
       return (
         <>
           <div className="flex">
-            <div className="editor">
+            <div className="editor" style={{ pointerEvents: 'none' }}>
               <header>{this.state.project.filename}</header>
             </div>
             <TypedMosaic

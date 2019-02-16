@@ -14,6 +14,7 @@ export default class extends React.Component {
       maxZoom: 2.0,
       minZoom: 0.1
     });
+    this.handler.zoomTo(el.clientWidth * 0.85, el.clientHeight * 0.25, 0.85);
   }
 
   @autobind
