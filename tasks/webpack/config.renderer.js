@@ -1,5 +1,6 @@
 // @ts-nocheck
 const merge = require('webpack-merge');
+const CSS = require('mini-css-extract-plugin');
 const base = require('./config.base');
 
 module.exports = merge(base, {
@@ -9,30 +10,18 @@ module.exports = merge(base, {
     preload: './src/renderer/entry/preload.ts'
   },
   target: 'electron-renderer',
+  plugins: [
+    new CSS({
+      filename: 'styles/[name].css',
+      chunkFilename: 'styles/[id].css'
+    })
+  ],
   module: {
     rules: [
       {
-        test: /\.css$/,
+        test: /\.(scss|css)$/,
         use: [
-          'style-loader',
-          {
-            loader: 'css-loader',
-            options: { sourceMap: true }
-          },
-          {
-            loader: 'postcss-loader',
-            options: {
-              ident: 'postcss',
-              sourceMap: true,
-              plugins: [require('autoprefixer')()]
-            }
-          }
-        ]
-      },
-      {
-        test: /\.s[ac]ss$/,
-        use: [
-          'style-loader',
+          CSS.loader,
           {
             loader: 'css-loader',
             options: { sourceMap: true }
