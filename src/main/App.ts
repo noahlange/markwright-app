@@ -46,7 +46,9 @@ export default class App {
   public basedir: string = homedir();
   public platform: string = platform();
   public version: string = '0.1.0';
-  public opening: string | null = null;
+
+  public opening: string | null;
+
   public store = new Store();
 
   public project!: IProject;
@@ -55,14 +57,23 @@ export default class App {
     content: EventsContent;
   };
 
+  public get isMac() {
+    return this.platform === 'darwin';
+  }
+
+  public get isPC() {
+    return this.platform === 'win32';
+  }
+
   public constructor(settings: AppSettings) {
     this.electron = settings.app;
+    this.opening = this.isPC ? process.argv[1] : null;
     this.initialize();
   }
 
   public async createWindow() {
     this.window = new BrowserWindow({
-      backgroundColor: platform() === 'darwin' ? undefined : '#191919',
+      backgroundColor: this.isPC ? '#191919' : undefined,
       height: this.store.get('window.height', 800),
       titleBarStyle: 'hidden',
       vibrancy: 'dark',
@@ -139,7 +150,7 @@ export default class App {
     this.electron.on(Events.WINDOW_ALL_CLOSED, async () => {
       // On OS X it is common for applications and their menu bar
       // to stay active until the user quits explicitly with Cmd + Q
-      if (process.platform !== 'darwin') {
+      if (this.isPC) {
         this.electron.quit();
       }
     });

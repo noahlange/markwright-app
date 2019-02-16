@@ -75,7 +75,7 @@ export default class TabbedEditor extends React.Component<
   }
 
   public componentDidMount() {
-    listen('keypress', e => {
+    listen('keydown', e => {
       if (e.ctrlKey && e.code === 'Tab') {
         const idx =
           (TabbedEditor.tabs.indexOf(this.state.tab) + 1) %
@@ -86,7 +86,7 @@ export default class TabbedEditor extends React.Component<
   }
 
   public componentWillUnmount() {
-    unlisten('keypress');
+    unlisten('keydown');
   }
 
   public tab(tab: ContentType): () => void {
