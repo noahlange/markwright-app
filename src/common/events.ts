@@ -9,6 +9,7 @@ enum Events {
   APP_ACTIVATE = 'activate',
   APP_DATA_LOADED = 'app-data-loaded',
   APP_RENDER_PROGRESS = 'app-render-progress',
+  APP_ALL_READY = 'app-ready',
 
   APP_EVENT = 'app-event',
   APP_CONNECTED = 'app-window-connected',

@@ -10,6 +10,7 @@ import installExtension, {
   REACT_DEVELOPER_TOOLS
 } from 'electron-devtools-installer';
 
+import { autobind } from 'core-decorators';
 import Store from 'electron-store';
 
 import { homedir, platform } from 'os';
@@ -31,6 +32,7 @@ import window from './menu/window';
 type AppSettings = {
   app: ElectronApp;
   basedir: string;
+  opening: string | null;
 };
 
 enum Clients {
@@ -67,7 +69,7 @@ export default class App {
 
   public constructor(settings: AppSettings) {
     this.electron = settings.app;
-    this.opening = this.isPC ? process.argv[1] : null;
+    this.opening = this.isPC ? process.argv[1] : settings.opening;
     this.initialize();
   }
 
@@ -105,7 +107,25 @@ export default class App {
     }
   }
 
-  public async initialize() {
+  @autobind
+  public async handleAppEvent(
+    _: Electron.Event,
+    c: Events,
+    args: Array<unknown>
+  ) {
+    if (c === Events.APP_CONNECTED) {
+      this.clients.push(_.sender);
+    }
+    if (this.clients.length === Clients.BOTH) {
+      if (this.opening) {
+        this.emit(Events.APP_FILE, this.opening);
+        this.opening = null;
+      }
+    }
+    await this.emit(c, ...args);
+  }
+
+  public setMenu() {
     Menu.setApplicationMenu(
       Menu.buildFromTemplate([
         main(this),
@@ -115,37 +135,13 @@ export default class App {
         window(this)
       ].filter(m => !!m) as MenuItemConstructorOptions[])
     );
+  }
 
-    await installExtension(REACT_DEVELOPER_TOOLS);
-
-    ipcMain.on(
-      Events.APP_EVENT,
-      async (_: Electron.Event, c: Events, args: Array<unknown>) => {
-        if (c === Events.APP_CONNECTED) {
-          this.clients.push(_.sender);
-        }
-        // need to wait for editor and preview pane
-        if (this.opening && this.clients.length === Clients.BOTH) {
-          await this.emit(Events.APP_FILE, this.opening);
-          this.opening = null;
-        }
-        await this.emit(c, ...args);
-      }
-    );
-
+  public async initialize() {
     this.events = {
       application: EventsApplication.from<EventsApplication>(this),
       content: EventsContent.from<EventsContent>(this)
     };
-
-    this.electron.on(Events.OPEN_FILE, async (e, path) => {
-      // wait for clients to connect
-      e.preventDefault();
-      if (this.window === null) {
-        this.opening = path;
-        await this.createWindow();
-      }
-    });
 
     this.electron.on(Events.WINDOW_ALL_CLOSED, async () => {
       // On OS X it is common for applications and their menu bar
@@ -163,6 +159,10 @@ export default class App {
       }
     });
 
+    ipcMain.on(Events.APP_EVENT, this.handleAppEvent);
+
     await this.createWindow();
+    this.setMenu();
+    await installExtension(REACT_DEVELOPER_TOOLS);
   }
 }

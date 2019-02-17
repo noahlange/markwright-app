@@ -115,17 +115,17 @@ export default class Editor extends React.Component<Props> {
     } else {
       const m = this.editor.getModel();
       if (m && value !== m.getValue()) {
-          m.pushEditOperations(
-            [],
-            [
-              {
-                forceMoveMarkers: true,
-                range: m.getFullModelRange(),
-                text: value
-              }
-            ],
-            () => null
-          );
+        m.pushEditOperations(
+          [],
+          [
+            {
+              forceMoveMarkers: true,
+              range: m.getFullModelRange(),
+              text: value
+            }
+          ],
+          () => null
+        );
       }
     }
   }

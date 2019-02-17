@@ -5,7 +5,7 @@ type DomTooltipState = {
   element: HTMLElement | null;
 };
 
-export default class DomTooltip extends React.Component {
+export default class Tooltip extends React.Component {
   public target!: HTMLDivElement;
   public state: DomTooltipState = {
     element: null

@@ -1,3 +1,4 @@
+import Events from '@common/events';
 import { ContentType } from '@common/types';
 import cache from 'js-cache';
 // @ts-ignore
@@ -5,10 +6,9 @@ import Markwright from 'markwright';
 import React from 'react';
 import { proxy } from 'workly/index';
 
-import Events from '@common/events';
 import { styles } from '../../themes/markwright';
-import DomTooltip from '../dom-tooltip';
 import PanZoom from '../pan-zoom';
+import Tooltip from '../tooltip';
 
 type PreviewProps = {
   base: string;
@@ -33,7 +33,6 @@ export default class Preview extends React.Component<PreviewProps> {
   }
 
   public componentDidMount() {
-    events.send(Events.APP_CONNECTED);
     events.send(Events.APP_READY_PREVIEW);
   }
 
@@ -42,7 +41,7 @@ export default class Preview extends React.Component<PreviewProps> {
       <main className="preview">
         <style type="text/css">{this.themeCSS}</style>
         <style type="text/css">{this.props.data[ContentType.STYLES]}</style>
-        <DomTooltip>
+        <Tooltip>
           <PanZoom>
             <Markwright
               config={{
@@ -68,7 +67,7 @@ export default class Preview extends React.Component<PreviewProps> {
               page={1}
             />
           </PanZoom>
-        </DomTooltip>
+        </Tooltip>
       </main>
     );
   }

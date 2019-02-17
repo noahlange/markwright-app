@@ -90,11 +90,13 @@
     "appId": "com.noahlange.markwright",
     "productName": "Markwright",
     "directories": {
-      "output": "dist"
+      "output": "dist",
+      "buildResources": "public/static"
     },
     "fileAssociations": {
       "ext": "mw",
-      "name": "Markwright document"
+      "name": "Markwright document",
+      "role": "Editor"
     },
     "files": [
       "node_modules",
@@ -102,13 +104,13 @@
       "package.json"
     ],
     "mac": {
-      "icon": "public/static/icon.icns",
       "category": "public.app-category.graphics-design",
-      "target": "dmg"
+      "target": "dmg",
+      "icon": "icon.icns"
     },
     "win": {
       "target": "nsis",
-      "icon": "public/static/icon.ico"
+      "icon": "icon.ico"
     }
   }
 }
