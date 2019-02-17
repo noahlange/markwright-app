@@ -44,6 +44,11 @@ export default class Markwright extends React.Component<{}, AppState> {
       [ContentType.METADATA]: []
     },
     filename: 'Untitled.mw',
+    initial: {
+      [ContentType.CONTENT]: '',
+      [ContentType.STYLES]: '',
+      [ContentType.METADATA]: '{}'
+    },
     load: Date.now(),
     mosaic: {
       direction: 'row',
@@ -61,8 +66,10 @@ export default class Markwright extends React.Component<{}, AppState> {
     changeContent: async (type: ContentType, value: string) => {
       events.send(Events.APP_CONTENT_PROCESS, { type, value });
     },
+    /** no-op - loses focus over web-view. */
     changeMosaic: async (mosaic: Panes | MosaicParent<Panes> | null) => {
-      this.setState({ mosaic });
+      // this.setState({ mosaic });
+      return null;
     }
   };
 
@@ -121,15 +128,15 @@ export default class Markwright extends React.Component<{}, AppState> {
       [Panes.PREVIEW]: () => (
         <WebView
           blinkfeatures="OverlayScrollbars"
-          src={'preview.html'}
-          preload={'./scripts/preload.js'}
+          src="preview.html"
+          preload="./scripts/preload.js"
         />
       )
     };
     return (
       <>
         <div className="flex">
-          <div className="editor" style={{ pointerEvents: 'none' }}>
+          <div className="editor">
             <header>{this.state.filename}</header>
           </div>
           <TypedMosaic

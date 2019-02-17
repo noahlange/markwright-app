@@ -11,7 +11,8 @@ const read = promises.readFile;
 /**
  * Resolve SASS imports.
  *
- * @todo ditto with the watchlist...
+ * @todo should add these files to a watchlist, so imports updated outside the
+ * application will be updated...
  */
 function fetch(base: () => string) {
   return (url: string, prev: string, done: $AnyFixMe) => {
@@ -36,17 +37,6 @@ export default class SASSProcessor implements IProcessor {
     this.app = app;
   }
 
-  public sass(str: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      sass.render(
-        { data: str, importer: fetch(() => this.app.basedir) },
-        (err, res) => {
-          err ? reject(err.message) : resolve(res.css.toString());
-        }
-      );
-    });
-  }
-
   public async process(value: string) {
     if (value !== '') {
       try {
@@ -69,5 +59,16 @@ export default class SASSProcessor implements IProcessor {
         value
       };
     }
+  }
+
+  protected sass(str: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      sass.render(
+        { data: str, importer: fetch(() => this.app.basedir) },
+        (err, res) => {
+          err ? reject(err.message) : resolve(res.css.toString());
+        }
+      );
+    });
   }
 }

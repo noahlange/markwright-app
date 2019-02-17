@@ -13,10 +13,7 @@ export interface IError {
 export interface IProject {
   directory: string;
   filename: string | null;
-  content: {
-    [ContentType.CONTENT]: string;
-    [ContentType.STYLES]: string;
-    [ContentType.METADATA]: string;
-  };
+  content: Record<ContentType, string>;
+  initial: Record<ContentType, string>;
   errors: Record<ContentType, IError[]>;
 }

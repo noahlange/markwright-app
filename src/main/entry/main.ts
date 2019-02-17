@@ -1,14 +1,13 @@
 import Events from '@common/events';
 import { app } from 'electron';
+import { homedir } from 'os';
 import App from '../App';
 
 let application: App;
 let opening: string | null = null;
 
 app.on(Events.OPEN_FILE, (e, path) => {
-  if (e) {
-    e.preventDefault();
-  }
+  e.preventDefault();
   opening = path;
 });
 
@@ -16,9 +15,5 @@ app.on(Events.OPEN_FILE, (e, path) => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on(Events.APP_READY, () => {
-  application = new App({
-    app,
-    basedir: process.cwd(),
-    opening
-  });
+  application = new App({ app, basedir: homedir(), opening });
 });

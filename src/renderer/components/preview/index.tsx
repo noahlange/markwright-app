@@ -38,7 +38,7 @@ export default class Preview extends React.Component<PreviewProps> {
 
   public render() {
     return (
-      <main className="preview">
+      <main className="preview" style={{ pointerEvents: 'none' }}>
         <style type="text/css">{this.themeCSS}</style>
         <style type="text/css">{this.props.data[ContentType.STYLES]}</style>
         <Tooltip>

@@ -52,10 +52,10 @@ export default class MarkdownProcessor implements IProcessor {
       };
     } catch (e) {
       return {
+        // @todo get lc
         errors: [{ message: e.message, line: 0, col: 0 }],
         success: false,
         value: ''
-        // @todo get lc
       };
     }
   }

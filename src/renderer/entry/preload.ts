@@ -11,18 +11,6 @@ const send = (e: string, ...args: $AnyFixMe[]) =>
   ipc.send(Events.APP_EVENT, e, args);
 
 Object.assign(window, {
-  MonacoEnvironment: {
-    getWorkerUrl(_: $AnyFixMe, label: string) {
-      switch (label) {
-        case 'scss':
-          return 'workers/css.worker.js';
-        case 'json':
-          return 'workers/json.worker.js';
-        default:
-          return 'workers/editor.worker.js';
-      }
-    }
-  },
   events: {
     off,
     on,

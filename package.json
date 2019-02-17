@@ -1,6 +1,7 @@
 {
   "name": "Markwright",
-  "version": "0.7.1",
+  "private": true,
+  "version": "0.7.2",
   "author": "Noah Lange <noahrlange@gmail.com>",
   "description": "dead-simple desktop publishing with markdown and sass",
   "main": "public/scripts/main.js",
@@ -18,14 +19,12 @@
     "@types/node-sass": "^3.10.32",
     "@types/react": "^16.7.4",
     "@types/react-dom": "^16.0.9",
-    "@types/react-router-dom": "^4.3.1",
     "autoprefixer": "^9.3.1",
     "babel-loader": "^8.0.5",
     "cross-env": "^5.2.0",
     "css-loader": "^1.0.1",
     "electron": "^4.0.4",
     "electron-builder": "^20.38.5",
-    "express": "^4.16.4",
     "file-loader": "^3.0.1",
     "mini-css-extract-plugin": "^0.5.0",
     "monaco-editor-webpack-plugin": "^1.7.0",
@@ -33,53 +32,51 @@
     "prettier": "^1.16.4",
     "sass-loader": "^7.0.3",
     "source-map-loader": "^0.2.3",
-    "style-loader": "^0.23.1",
     "tslint": "^5.12.1",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.3.3",
     "webpack": "^4.29.3",
     "webpack-cli": "^3.1.2",
     "webpack-merge": "^4.2.1",
-    "webpack-node-externals": "^1.7.2"
+    "webpack-node-externals": "^1.7.2",
+    "firacode": "^1.205.0",
+    "highlight.js": "^9.14.2",
+    "lodash": "^4.17.11",
+    "markwright": "noahlange/markwright#devirtualized",
+    "monaco-editor": "^0.15.6",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
+    "react-electron-web-view": "^2.0.1",
+    "react-mosaic-component": "^2.0.2",
+    "react-promise": "^2.0.3",
+    "workly": "^1.2.0",
+    "simple-markdown": "^0.4.1"
   },
   "dependencies": {
     "core-decorators": "^0.20.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-store": "^2.0.0",
-    "firacode": "^1.205.0",
+    "fast-deep-equal": "^2.0.1",
     "hercule": "^4.1.1",
-    "highlight.js": "^9.14.2",
     "js-cache": "^1.0.3",
     "jsonc-parser": "^2.0.1",
     "line-column": "^1.0.2",
-    "lodash": "^4.17.11",
-    "markwright": "noahlange/markwright#devirtualized",
-    "monaco-editor": "^0.15.6",
     "node-sass": "^4.9.3",
     "panzoom": "^7.1.2",
     "paper-size": "^1.1.0",
-    "pluralize": "^7.0.0",
-    "react": "^16.6.3",
-    "react-dev-server": "^0.6.2",
-    "react-dom": "^16.6.3",
-    "react-electron-web-view": "^2.0.1",
-    "react-mosaic-component": "^2.0.2",
-    "react-promise": "^2.0.3",
-    "simple-markdown": "^0.4.1",
-    "stream-to-string": "^1.1.0",
-    "workly": "^1.2.0"
+    "stream-to-string": "^1.1.0"
   },
   "prettier": {
     "singleQuote": true
   },
   "scripts": {
     "build": "webpack --config tasks/webpack.config.js",
-    "lint": "tslint --fix -c tslint.json 'src/**/*.{ts,tsx}'",
     "start": "electron .",
     "pretty": "prettier --write 'src/**/*.{ts,tsx}'",
     "types": "tsc",
+    "lint": "tslint --fix -c tslint.json 'src/**/*.{ts,tsx}'",
     "rebuild": "./tasks/sass.sh",
-    "dist": "yarn run build && build"
+    "dist": "cross-env NODE_ENV=production npm run build && build"
   },
   "build": {
     "asarUnpack": [
@@ -99,7 +96,6 @@
       "role": "Editor"
     },
     "files": [
-      "node_modules",
       "public",
       "package.json"
     ],

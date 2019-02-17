@@ -17,11 +17,12 @@ enum Events {
   APP_READY_EDITOR = 'app-editor-ready',
   APP_READY_PREVIEW = 'app-preview-ready',
 
+  APP_NEW = 'app-project-new',
   APP_LOAD = 'app-project-load',
   APP_FILE = 'app-project-file',
   APP_OPEN = 'app-project-open',
+  APP_OPEN_RECENT = 'app-open-recent',
   APP_SAVE = 'app-project-save',
-  APP_SAVE_AS = 'app-project-save-as',
   APP_EXPORT_PDF = 'app-export-pdf',
 
   APP_CONTENT_PROCESS = 'app-content-process',

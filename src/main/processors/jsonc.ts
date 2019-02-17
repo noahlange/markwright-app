@@ -2,6 +2,9 @@ import App from '@main/App';
 import { parse, ParseError, ParseErrorCode } from 'jsonc-parser';
 import lc from 'line-column';
 
+/**
+ * Babel doesn't understand const enums, therefore we're using the number literals.
+ */
 const ParseErrors: Record<ParseErrorCode, string> = {
   [1]: 'Invalid symbol',
   [2]: 'Invalid number format',

@@ -1,7 +1,6 @@
 import App from '@main/App';
-import { MenuItemConstructorOptions } from 'electron';
 
-export default function(app: App): MenuItemConstructorOptions | null {
+export default function(app: App) {
   return app.platform === 'win32'
     ? null
     : {

@@ -13,7 +13,7 @@ import installExtension, {
 import { autobind } from 'core-decorators';
 import Store from 'electron-store';
 
-import { homedir, platform } from 'os';
+import { platform } from 'os';
 import { resolve } from 'path';
 import { format } from 'url';
 
@@ -41,17 +41,30 @@ enum Clients {
   BOTH
 }
 
+const recursivelyFilterNullMenuItems = (
+  menu: MenuItemConstructorOptions
+): MenuItemConstructorOptions => {
+  const submenu: any = menu.submenu
+    ? Array.isArray(menu.submenu)
+      ? menu.submenu.filter(i => i !== null)
+      : recursivelyFilterNullMenuItems(menu)
+    : undefined;
+  return {
+    ...menu,
+    submenu
+  };
+};
+
 export default class App {
   public window: BrowserWindow | null = null;
   public clients: WebContents[] = [];
   public electron: ElectronApp;
-  public basedir: string = homedir();
   public platform: string = platform();
-  public version: string = '0.1.0';
-
+  public version: string = '0.7.0';
+  public basedir: string;
   public opening: string | null;
-
   public store = new Store();
+  public recent: string[] = [];
 
   public project!: IProject;
   public events!: {
@@ -68,9 +81,38 @@ export default class App {
   }
 
   public constructor(settings: AppSettings) {
+    this.basedir = settings.basedir;
     this.electron = settings.app;
     this.opening = this.isPC ? process.argv[1] : settings.opening;
+    this.recent = this.store.get('recent', []);
     this.initialize();
+  }
+
+  /**
+   * Add a recent file to the File -> Open Recent menu.
+   * @param filename
+   */
+  public addRecentFile(filename: string) {
+    this.recent = (this.recent.includes(filename)
+      ? this.recent.filter(n => n !== filename)
+      : this.recent
+    ).concat(filename);
+    this.store.set('recent', this.recent);
+    this.setMenu();
+  }
+
+  /**
+   * Set (or reset) the application menu
+   */
+  public async setMenu() {
+    Menu.setApplicationMenu(
+      Menu.buildFromTemplate(
+        [main, file, edit, view, window]
+          .map(fn => fn(this))
+          .filter(m => !!m)
+          .map((m: $AnyFixMe) => recursivelyFilterNullMenuItems(m))
+      )
+    );
   }
 
   public async createWindow() {
@@ -125,18 +167,6 @@ export default class App {
     await this.emit(c, ...args);
   }
 
-  public setMenu() {
-    Menu.setApplicationMenu(
-      Menu.buildFromTemplate([
-        main(this),
-        file(this),
-        edit(this),
-        view(this),
-        window(this)
-      ].filter(m => !!m) as MenuItemConstructorOptions[])
-    );
-  }
-
   public async initialize() {
     this.events = {
       application: EventsApplication.from<EventsApplication>(this),
@@ -162,7 +192,7 @@ export default class App {
     ipcMain.on(Events.APP_EVENT, this.handleAppEvent);
 
     await this.createWindow();
-    this.setMenu();
+    await this.setMenu();
     await installExtension(REACT_DEVELOPER_TOOLS);
   }
 }

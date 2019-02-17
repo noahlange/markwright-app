@@ -8,6 +8,11 @@
   <body>
     <div id="grab-bar"></div>
     <div id="react-root"></div>
+    <script type="text/javascript">
+      window.eval = global.eval = () => {
+        throw new Error('window.eval() has been explicitly disabled.');
+      };
+    </script>
     <script type="text/javascript" src="scripts/renderer.js"></script>
   </body>
 </html>

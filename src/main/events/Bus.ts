@@ -1,5 +1,6 @@
 import Events from '@common/events';
 import { Event, ipcMain } from 'electron';
+
 import App from '../App';
 
 export default class EventBus {

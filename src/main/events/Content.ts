@@ -3,6 +3,7 @@ import { ContentType, IError } from '@common/types';
 import JSONCProcessor from '@main/processors/jsonc';
 import MarkdownProcessor from '@main/processors/markdown';
 import SASSProcessor from '@main/processors/sass';
+
 import EventBus from './Bus';
 
 type ContentPayload = {

@@ -1,6 +1,5 @@
 // @ts-nocheck
 const merge = require('webpack-merge');
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const base = require('./config.base');
 
 module.exports = merge(base, {
@@ -11,10 +10,5 @@ module.exports = merge(base, {
     filename: 'workers/[name].js'
   },
   target: 'webworker',
-  plugins: [
-    new MonacoWebpackPlugin({
-      output: 'workers',
-      languages: ['markdown', 'json', 'css', 'scss']
-    })
-  ]
+  plugins: []
 });

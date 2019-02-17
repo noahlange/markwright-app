@@ -2,10 +2,7 @@
   "defaultSeverity": "warning",
   "extends": ["tslint:latest", "tslint-config-prettier"],
   "rules": {
-    "no-implicit-dependencies": [
-      true,
-      ["electron", "@main", "@common", "@renderer"]
-    ],
+    "no-implicit-dependencies": false,
     "no-submodule-imports": false,
     "interface-over-type-literal": false
   }

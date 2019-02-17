@@ -7,7 +7,7 @@ import { ContentType } from '@common/types';
 import { listen, unlisten } from '@renderer/utils/listen';
 
 import { autobind } from 'core-decorators';
-import * as monaco from 'monaco-editor';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import React from 'react';
 
 type Props = {

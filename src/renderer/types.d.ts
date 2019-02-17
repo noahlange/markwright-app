@@ -11,5 +11,4 @@ declare global {
     off: (events: Events[]) => void;
     send: (event: Events, ...args: $AnyFixMe[]) => void;
   };
-  var MonacoEnvironment: $AnyFixMe;
 }
