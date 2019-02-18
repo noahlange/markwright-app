@@ -89,10 +89,7 @@ export default class Tooltip extends React.Component {
 
   public render() {
     return (
-      <div
-        onMouseMove={this.onMouseMove}
-        style={{ width: '100%', height: '100%' }}
-      >
+      <div onMouseMove={this.onMouseMove}>
         <div id="tooltip-container">
           {this.state.element ? (
             <div style={this.tooltipStyle}>

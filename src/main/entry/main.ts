@@ -8,12 +8,16 @@ let opening: string | null = null;
 
 app.on(Events.OPEN_FILE, (e, path) => {
   e.preventDefault();
-  opening = path;
+  if (application) {
+    application.emit(Events.APP_OPEN_FILE, path);
+  } else {
+    opening = path;
+  }
 });
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on(Events.APP_READY, () => {
+app.on(Events.READY, () => {
   application = new App({ app, basedir: homedir(), opening });
 });

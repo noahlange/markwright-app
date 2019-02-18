@@ -128,6 +128,7 @@ export function styles<T extends typeof defaults>(
     .section {
       display: flex;
       flex-direction: column;
+      margin: 0 auto;
     }
 
     .section > div {
@@ -223,6 +224,10 @@ export function styles<T extends typeof defaults>(
       border-top: 1px solid var(--grey-light);
       margin-top: 0.5rem;
       padding-top: 0.5rem;
+    }
+
+    .footnote {
+      display: block;
     }
     
     pre, code {

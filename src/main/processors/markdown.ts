@@ -1,12 +1,12 @@
+import App from '@main/App';
+import { IProcessor } from '@main/events/Content';
+
 import {
   resolveHttpUrl,
   resolveLocalUrl,
   resolveString,
   transcludeString
 } from 'hercule';
-
-import App from '@main/App';
-import { IProcessor } from '@main/events/Content';
 import cache from 'js-cache';
 import path from 'path';
 import toString from 'stream-to-string';

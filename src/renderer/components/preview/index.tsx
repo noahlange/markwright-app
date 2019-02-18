@@ -1,7 +1,7 @@
 import Events from '@common/events';
 import { ContentType } from '@common/types';
 import cache from 'js-cache';
-// @ts-ignore
+
 import Markwright from 'markwright';
 import React from 'react';
 import { proxy } from 'workly/index';
@@ -38,7 +38,16 @@ export default class Preview extends React.Component<PreviewProps> {
 
   public render() {
     return (
-      <main className="preview" style={{ pointerEvents: 'none' }}>
+      <main
+        className="preview"
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          margin: 'calc(calc(100vh - 8.5in) / 4) auto',
+          outline: 'none',
+          pointerEvents: 'none'
+        }}
+      >
         <style type="text/css">{this.themeCSS}</style>
         <style type="text/css">{this.props.data[ContentType.STYLES]}</style>
         <Tooltip>
@@ -57,11 +66,7 @@ export default class Preview extends React.Component<PreviewProps> {
                     return res;
                   }
                 },
-                manual: this.metadata('manual', true),
-                page: {
-                  height: 8.5 * 96,
-                  width: 11 * 96
-                }
+                manual: this.metadata('manual', true)
               }}
               value={this.props.data[ContentType.CONTENT]}
               page={1}

@@ -42,7 +42,7 @@
     "firacode": "^1.205.0",
     "highlight.js": "^9.14.2",
     "lodash": "^4.17.11",
-    "markwright": "noahlange/markwright#devirtualized",
+    "markwright": "noahlange/markwright#virtualized",
     "monaco-editor": "^0.15.6",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
@@ -64,6 +64,7 @@
     "node-sass": "^4.9.3",
     "panzoom": "^7.1.2",
     "paper-size": "^1.1.0",
+    "react-window": "^1.5.1",
     "stream-to-string": "^1.1.0"
   },
   "prettier": {

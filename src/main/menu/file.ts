@@ -1,29 +1,30 @@
 import Events from '@common/events';
+import _, { T } from '@common/l10n';
 import App from '@main/App';
 import { basename } from 'path';
 
 export default function(app: App) {
   return {
-    label: 'File',
+    label: _(T.FILE),
     submenu: [
       {
         accelerator: 'CmdOrCtrl+N',
         click: () => app.emit(Events.APP_NEW),
-        label: 'New',
+        label: _(T.NEW),
         role: 'new'
       },
       {
         accelerator: 'CmdOrCtrl+O',
-        click: () => app.emit(Events.APP_OPEN),
-        label: 'Open',
+        click: () => app.emit(Events.APP_OPEN_PROMPT),
+        label: _(T.OPEN),
         role: 'open'
       },
       app.recent.length
         ? {
-            label: 'Open Recent',
+            label: _(T.OPEN_RECENT),
             submenu: [
               ...app.recent.map(filename => ({
-                click: () => app.emit(Events.APP_OPEN_RECENT, filename),
+                click: () => app.emit(Events.APP_OPEN_FILE, filename),
                 label: basename(filename)
               })),
               { type: 'separator' },
@@ -32,7 +33,7 @@ export default function(app: App) {
                   app.recent = [];
                   app.setMenu();
                 },
-                label: 'Clear Menu'
+                label: _(T.CLEAR_MENU)
               }
             ]
           }
@@ -40,14 +41,14 @@ export default function(app: App) {
       {
         accelerator: 'CmdOrCtrl+S',
         click: () => app.emit(Events.APP_SAVE),
-        label: 'Save',
+        label: _(T.SAVE),
         role: 'save'
       },
       { type: 'separator' },
       {
         accelerator: 'CmdOrCtrl+E',
         click: () => app.emit(Events.APP_EXPORT_PDF),
-        label: 'Export to PDF',
+        label: _(T.EXPORT_TO_PDF),
         role: 'print'
       }
     ]

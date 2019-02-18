@@ -2,6 +2,7 @@ import { autobind } from 'core-decorators';
 import { Cancelable, debounce } from 'lodash';
 import * as React from 'react';
 
+import _, { T } from '@common/l10n';
 import { ContentType } from '@common/types';
 import { listen, unlisten } from '@renderer/utils/listen';
 import Editor from '../editor';
@@ -110,13 +111,13 @@ export default class TabbedEditor extends React.Component<
       <div>
         <div className={`tabs ${this.state.tab}`}>
           <button className="content" onClick={this.tab(ContentType.CONTENT)}>
-            Content (Markdown)
+            {_(T.TAB_CONTENT)}
           </button>
           <button className="styles" onClick={this.tab(ContentType.STYLES)}>
-            Styles (SCSS)
+            {_(T.TAB_STYLES)}
           </button>
           <button className="metadata" onClick={this.tab(ContentType.METADATA)}>
-            Metadata (JSON)
+            {_(T.TAB_METADATA)}
           </button>
         </div>
         <Editor

@@ -3,6 +3,7 @@ import WebView from 'react-electron-web-view';
 import { Mosaic, MosaicParent, MosaicWindow } from 'react-mosaic-component';
 
 import Events from '@common/events';
+import _, { T } from '@common/l10n';
 import { ContentType, IProject } from '@common/types';
 import { ContentResponse } from '@main/events/Content';
 
@@ -26,9 +27,9 @@ const TypedWindow = MosaicWindow.ofType<Panes>();
 
 export default class Markwright extends React.Component<{}, AppState> {
   public static titles: Record<Panes, string> = {
-    [Panes.EDITOR]: 'Editor',
-    [Panes.ISSUES]: 'Problems',
-    [Panes.PREVIEW]: 'Preview'
+    [Panes.EDITOR]: _(T.PANE_CONTENT),
+    [Panes.ISSUES]: _(T.PANE_PROBLEMS),
+    [Panes.PREVIEW]: _(T.PANE_PREVIEW)
   };
 
   public state: AppState = {
@@ -80,7 +81,7 @@ export default class Markwright extends React.Component<{}, AppState> {
       ContentType.METADATA
     ];
 
-    events.on(Events.APP_LOAD, async (_, project: IProject) => {
+    events.on(Events.APP_LOAD, async (e, project: IProject) => {
       this.setState({ ...project, load: Date.now() });
       for (const type of types) {
         events.send(Events.APP_CONTENT_PROCESS, {
@@ -90,7 +91,7 @@ export default class Markwright extends React.Component<{}, AppState> {
       }
     });
 
-    events.on(Events.APP_CONTENT_PROCESSED, (_, res: ContentResponse) => {
+    events.on(Events.APP_CONTENT_PROCESSED, (e, res: ContentResponse) => {
       this.setState({
         errors: {
           ...this.state.errors,
@@ -102,7 +103,7 @@ export default class Markwright extends React.Component<{}, AppState> {
     events.send(Events.APP_CONNECTED);
     events.send(Events.APP_READY_EDITOR);
 
-    listen('resize', _ => {
+    listen('resize', e => {
       events.send(Events.WINDOW_RESIZED, {
         height: window.outerHeight,
         width: window.outerWidth
@@ -126,11 +127,7 @@ export default class Markwright extends React.Component<{}, AppState> {
       ),
       [Panes.ISSUES]: () => <Problems data={props.errors} />,
       [Panes.PREVIEW]: () => (
-        <WebView
-          blinkfeatures="OverlayScrollbars"
-          src="preview.html"
-          preload="./scripts/preload.js"
-        />
+        <WebView src="preview.html" preload="./scripts/preload.js" />
       )
     };
     return (

@@ -1,4 +1,5 @@
 import Events from '@common/events';
+import _, { T } from '@common/l10n';
 import { ContentType, IProject } from '@common/types';
 import App from '@main/App';
 
@@ -46,8 +47,8 @@ enum PromptResult {
 export default class ApplicationEvents extends EventBus {
   public events: Events[] = [
     Events.APP_NEW,
-    Events.APP_OPEN,
-    Events.APP_OPEN_RECENT,
+    Events.APP_OPEN_PROMPT,
+    Events.APP_OPEN_FILE,
     Events.APP_SAVE,
     Events.APP_FILE,
     Events.APP_EXPORT_PDF,
@@ -73,7 +74,7 @@ export default class ApplicationEvents extends EventBus {
     }
   }
 
-  public async [Events.APP_OPEN_RECENT](
+  public async [Events.APP_OPEN_FILE](
     filename: string
   ): Promise<IProject | void> {
     const res = await this.promptSave();
@@ -82,7 +83,7 @@ export default class ApplicationEvents extends EventBus {
     }
   }
 
-  public async [Events.APP_OPEN](): Promise<IProject | void> {
+  public async [Events.APP_OPEN_PROMPT](): Promise<IProject | void> {
     const res = await this.promptSave();
     // either saved or discarded
     if (res > PromptResult.CANCEL) {
@@ -160,25 +161,22 @@ export default class ApplicationEvents extends EventBus {
   protected async promptSave(): Promise<PromptResult> {
     if (!is(this.app.project.content, this.app.project.initial)) {
       const res = dialog.showMessageBox({
-        buttons: ['Cancel', 'Delete', 'Save'],
-        detail:
-          "You can choose to save your changes, or delete this document immediately. You can't undo this action.",
-        message: 'Do you want to keep "Untitled.mw"?',
+        buttons: [_(T.BTN_CANCEL), _(T.BTN_DELETE), _(T.BTN_SAVE)],
+        detail: _(T.SAVE_AS_DETAIL),
+        message: _(T.SAVE_AS_MESSAGE, this.app.project.filename),
         type: 'warning'
       });
       switch (res) {
-        case 0:
-          // do nothing
-          return PromptResult.CANCEL;
-        case 1:
-          // discard file
-          return PromptResult.DISCARD;
-        case 2:
+        case PromptResult.CANCEL:
+        case PromptResult.DISCARD:
+          return res;
+        case PromptResult.SAVE:
           // open save
           await this[Events.APP_SAVE]();
           return PromptResult.SAVE;
       }
     }
+    // file hasn't changed, discard
     return PromptResult.DISCARD;
   }
 }
