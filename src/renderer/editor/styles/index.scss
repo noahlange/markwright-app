@@ -1,0 +1,106 @@
+@import url('reset.css');
+@import url('react-mosaic-component.css');
+@import url('fira-code.css');
+
+:root {
+  --mono-stack: 'Fira Code', monospace;
+  --sans-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.col-break {
+  visibility: hidden;
+  break-after: always;
+}
+
+code {
+  font-variant: small-caps;
+}
+
+.tabs {
+  display: flex;
+}
+
+.tabs button {
+  flex: 1 0 auto;
+  height: 2rem;
+  border: none;
+  font-size: 14px;
+  background-color: #1a1a1a;
+  color: #a4a4a4;
+}
+
+.mosaic-window {
+  .mosaic-window-toolbar {
+    box-shadow: none;
+    color: #a4a4a4;
+    background-color: #1e1e1e;
+    font-family: var(--sans-stack);
+    font-size: small;
+  }
+  .mosaic-window-body {
+    background-color: #1a1a1a;
+  }
+  .mosaic-window-title {
+    text-align: center;
+  }
+}
+
+.tabs button {
+  &::focus {
+    outline: none;
+  }
+  &::hover {
+    cursor: pointer;
+  }
+
+  &.styles .styles,
+  &.content .content,
+  &.metadata .metadata {
+    color: #d4d4d4;
+    background-color: #1e1e1e;
+  }
+}
+
+#monaco-container {
+  resize: vertical;
+}
+
+.mosaic {
+  height: calc(100% - 1.5rem);
+}
+
+header {
+  text-align: center;
+  height: 2rem;
+  line-height: 2.5rem;
+  user-select: none;
+  color: #d4d4d4;
+  font-family: var(--sans-stack);
+  font-size: small;
+}
+
+.problems {
+  color: #d4d4d4;
+  background-color: #1a1a1a;
+  height: 100%;
+  font-family: var(--mono-stack);
+  font-size: small;
+  padding: 1rem;
+  line-height: 1.5;
+}
+
+body {
+  .darwin {
+    #grab-bar {
+      height: 1.5rem;
+      -webkit-app-region: drag;
+    }
+    #react-root {
+      margin-top: -2rem;
+    }
+  }
+  .win32 #grab-bar {
+    display: none;
+  }
+}

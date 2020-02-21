@@ -1,31 +1,46 @@
-import Events from '@common/events';
-import { Event, ipcMain } from 'electron';
+import { ipcMain } from 'electron';
 
-import App from '../App';
+import Events, { AppEvents } from '@common/events';
+import App from '@main/lib/App';
+import { autobind } from 'core-decorators';
+
+interface EventData {
+  event: AppEvents;
+  payload?: $AnyFixMe;
+}
 
 export default class EventBus {
-  public static from<T extends EventBus = EventBus>(app: App): T {
-    const e = new this(app) as T;
-    for (const channel of e.events) {
-      e.handle(channel);
-    }
-    return e;
-  }
-
   public app: App;
-  public events: Events[] = [];
+  public events: AppEvents[] = [];
 
   public constructor(app: App) {
     this.app = app;
   }
 
-  public handle(channel: Events): void {
-    if (this.events.includes(channel)) {
-      ipcMain.on(channel, async (_: Event, data: any) => {
-        if (channel in this) {
-          await (this as $AnyFixMe)[channel].bind(this)(data);
-        }
+  @autobind
+  public async handleEvent(_: Electron.Event, data: EventData): Promise<void> {
+    if (this.app.opening) {
+      this.emit(AppEvents.APP_FILE, {
+        opening: this.app.opening
       });
+      this.app.opening = null;
     }
+    const channel = data.event;
+    if (channel in this) {
+      const res = await (this as $AnyFixMe)[channel].call(this, data.payload);
+      this.send(channel, res);
+    }
+  }
+
+  @autobind
+  public send(channel: AppEvents, data: $AnyFixMe = {}): void {
+    if (this.app.window) {
+      this.app.window.webContents.send(channel, data);
+    }
+  }
+
+  @autobind
+  public emit(event: AppEvents, data: $AnyFixMe = {}): void {
+    ipcMain.emit(Events.APP_EVENT, null, { event, ...data });
   }
 }

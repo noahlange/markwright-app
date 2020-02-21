@@ -1,24 +1,17 @@
 // @ts-nocheck
 const merge = require('webpack-merge');
 const CSS = require('mini-css-extract-plugin');
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const base = require('./config.base');
 
 module.exports = merge(base, {
   entry: {
-    renderer: './src/renderer/entry/index.tsx',
-    preview: './src/renderer/entry/preview.tsx',
-    preload: './src/renderer/entry/preload.ts'
+    editor: './src/renderer/editor/index.tsx'
   },
   target: 'electron-renderer',
   plugins: [
     new CSS({
       filename: 'styles/[name].css',
       chunkFilename: 'styles/[id].css'
-    }),
-    new MonacoWebpackPlugin({
-      output: 'workers',
-      languages: ['markdown', 'json', 'css', 'scss']
     })
   ],
   module: {
@@ -53,7 +46,7 @@ module.exports = merge(base, {
           },
           {
             loader: 'sass-loader',
-            options: { sourceMap: true }
+            options: { sourceMap: true, implementation: require('sass') }
           }
         ]
       }

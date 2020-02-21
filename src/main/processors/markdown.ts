@@ -1,6 +1,3 @@
-import App from '@main/App';
-import { IProcessor } from '@main/events/Content';
-
 import {
   resolveHttpUrl,
   resolveLocalUrl,
@@ -11,8 +8,10 @@ import cache from 'js-cache';
 import path from 'path';
 import toString from 'stream-to-string';
 import { promisify } from 'util';
+import Project from '@main/lib/Project';
+import { Processor, ProcessResult } from '@common/types';
 
-function fetch(base: string) {
+function fetch(base: string): $AnyFixMe[] {
   return [resolveHttpUrl, resolveLocalUrl, resolveString].map(resolve => {
     return (url: string) => {
       const has = cache.get(url);
@@ -32,18 +31,18 @@ function fetch(base: string) {
   });
 }
 
-export default class MarkdownProcessor implements IProcessor {
+export default class MarkdownProcessor implements Processor {
   public transclude = promisify(transcludeString);
-  public app: App;
+  public project: Project;
 
-  public constructor(app: App) {
-    this.app = app;
+  public constructor(project: Project) {
+    this.project = project;
   }
 
-  public async process(value: string) {
+  public async process(value: string): Promise<ProcessResult> {
     try {
       const markdown = await this.transclude(value, {
-        resolvers: fetch(this.app.basedir)
+        resolvers: fetch(this.project.directory)
       });
       return {
         errors: [],

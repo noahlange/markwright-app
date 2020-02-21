@@ -23,7 +23,9 @@ export enum T {
   PANE_PREVIEW,
   TAB_CONTENT,
   TAB_STYLES,
-  TAB_METADATA
+  TAB_METADATA,
+  MENU_VIEW,
+  MENU_WINDOW
 }
 
 export const en: Record<T, string> = {
@@ -53,10 +55,12 @@ export const en: Record<T, string> = {
   [T.PANE_PREVIEW]: 'Preview',
   [T.TAB_CONTENT]: 'Markdown',
   [T.TAB_STYLES]: 'SCSS',
-  [T.TAB_METADATA]: 'JSON'
+  [T.TAB_METADATA]: 'JSON',
+  [T.MENU_VIEW]: 'View',
+  [T.MENU_WINDOW]: 'Window'
 };
 
-export default function _(str: T, ...args: any[]) {
+export default function _(str: T, ...args: (string | null)[]): string {
   const res = en[str];
-  return res.replace('%s', () => args.shift());
+  return res.replace('%s', () => args.shift() || '');
 }

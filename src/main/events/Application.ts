@@ -1,182 +1,152 @@
-import Events from '@common/events';
+import Events, { AppEvents } from '@common/events';
 import _, { T } from '@common/l10n';
-import { ContentType, IProject } from '@common/types';
-import App from '@main/App';
+import Project, { SerializedProject, ProjectInfo } from '@main/lib/Project';
 
-import { dialog } from 'electron';
-import is from 'fast-deep-equal';
 import { promises } from 'fs';
-import { parse } from 'jsonc-parser';
-import { homedir } from 'os';
-import { basename, dirname, resolve } from 'path';
-import { promisify } from 'util';
 
 import EventBus from './Bus';
+import { open, save, warn } from '@main/util/dialog';
+import { ContentType, ProcessResult } from '@common/types';
 
-const empty = {
-  content: {
-    [ContentType.CONTENT]: '',
-    [ContentType.STYLES]: '',
-    [ContentType.METADATA]: '{}'
-  },
-  directory: homedir() + '/',
-  errors: {
-    [ContentType.CONTENT]: [],
-    [ContentType.STYLES]: [],
-    [ContentType.METADATA]: []
-  },
-  filename: null,
-  initial: {
-    [ContentType.CONTENT]: '',
-    [ContentType.STYLES]: '',
-    [ContentType.METADATA]: '{}'
-  }
-};
+enum Results {
+  SUCCESS,
+  FAILURE,
+  CANCEL
+}
 
-type Dimensions = {
+interface Dimensions {
   width: number;
   height: number;
-};
+}
 
-enum PromptResult {
+export enum PromptResult {
   CANCEL = 0,
   DISCARD = 1,
   SAVE = 2
 }
 
 export default class ApplicationEvents extends EventBus {
-  public events: Events[] = [
-    Events.APP_NEW,
-    Events.APP_OPEN_PROMPT,
-    Events.APP_OPEN_FILE,
-    Events.APP_SAVE,
-    Events.APP_FILE,
-    Events.APP_EXPORT_PDF,
-    Events.WINDOW_RESIZED
-  ];
-
-  public constructor(app: App) {
-    super(app);
-    app.project = { ...empty };
-  }
-
-  public async [Events.WINDOW_RESIZED](dimensions: Dimensions) {
+  public async [Events.WINDOW_RESIZED](dimensions: Dimensions): Promise<void> {
     this.app.store.set('window', dimensions);
   }
 
-  public async [Events.APP_NEW]() {
-    if (!is(this.app.project.content, this.app.project.initial)) {
-      const res = await this.promptSave();
-      if (res > PromptResult.CANCEL) {
-        this.app.project = { ...empty };
-        this.app.emit(Events.APP_LOAD, this.app.project);
+  public async [AppEvents.APP_CONTENT_PROCESS]<T extends ContentType>(req: {
+    type: T;
+    value: string;
+  }): Promise<ProcessResult<T>> {
+    const { type, value } = req;
+    return this.app.project.update(type, value);
+  }
+
+  public async [AppEvents.APP_CLOSE](): Promise<boolean> {
+    switch (await this.close()) {
+      case Results.SUCCESS:
+        return true;
+      case Results.FAILURE:
+      case Results.CANCEL:
+        return false;
+    }
+  }
+
+  public async [AppEvents.APP_NEW](): Promise<void> {
+    switch (await this.close()) {
+      case Results.SUCCESS: {
+        this.app.project = await Project.from();
+        this.emit(AppEvents.APP_LOAD);
       }
     }
   }
 
-  public async [Events.APP_OPEN_FILE](
-    filename: string
-  ): Promise<IProject | void> {
-    const res = await this.promptSave();
-    if (res > PromptResult.CANCEL) {
-      await this[Events.APP_FILE](filename);
-    }
+  public async [AppEvents.APP_LOAD](): Promise<{
+    initial: SerializedProject;
+    results: $AnyFixMe;
+    project?: ProjectInfo;
+  }> {
+    const p = this.app.project;
+    return {
+      initial: this.app.project.toContent(),
+      results: this.app.project.toResults(),
+      project: {
+        id: p.id,
+        filename: p.filename,
+        filepath: p.filepath,
+        directory: p.directory,
+        version: this.app.version
+      }
+    };
   }
 
-  public async [Events.APP_OPEN_PROMPT](): Promise<IProject | void> {
-    const res = await this.promptSave();
-    // either saved or discarded
-    if (res > PromptResult.CANCEL) {
-      const [filename = null] = dialog.showOpenDialog({
-        filters: [
-          { name: 'Markwright document', extensions: ['mw'] },
-          { name: 'All Files', extensions: ['*'] }
-        ]
-      });
-      if (filename) {
-        await this[Events.APP_FILE](filename);
+  public async [AppEvents.APP_OPEN](filename?: string): Promise<void> {
+    switch (await this.close()) {
+      case Results.SUCCESS: {
+        const name = filename || (await open());
+        if (name) {
+          this.app.project = await Project.from(name);
+          if (this.app.window) {
+            this.app.window.setRepresentedFilename(name);
+            this.app.electron.addRecentDocument(name);
+            this.app.store.set('recent', [name, ...this.app.recent]);
+            this.app.setMenu();
+          }
+          this.emit(AppEvents.APP_LOAD);
+        }
       }
     }
   }
 
-  public async [Events.APP_SAVE]() {
-    const { directory, filename, content } = this.app.project;
-    if (filename) {
-      await promises.writeFile(
-        resolve(directory, filename),
-        JSON.stringify({
-          ...content,
-          version: this.app.version
-        }),
-        'utf8'
-      );
-    } else {
-      const file = dialog.showSaveDialog({
-        filters: [{ name: 'Markwright', extensions: ['mw'] }]
-      });
-      if (file) {
-        await promises.writeFile(
-          file,
-          JSON.stringify({
-            ...content,
-            version: this.app.version
-          }),
-          'utf8'
-        );
-      }
-    }
+  public async [AppEvents.APP_SAVE](): Promise<void> {
+    await this.close();
+    return;
   }
 
-  public async [Events.APP_EXPORT_PDF]() {
-    const wc = this.app.clients.find(c => c.getURL().endsWith('preview.html'));
-    const target = dialog.showSaveDialog({
-      filters: [{ name: 'PDF Document', extensions: ['pdf'] }]
-    });
-    if (wc && target) {
-      // fn needs to be bound
-      const printToPDF = promisify(wc.printToPDF).bind(wc);
-      const buffer = await printToPDF({
-        marginsType: 1, // no margins, leave these up to the user
-        pageSize: 'Letter', // @todo configurable
-        printBackground: true // always print CSS backgrounds
-      });
+  public async [AppEvents.APP_PDF_EXPORT_READY](): Promise<void> {
+    const target = await save({ pdf: 'PDF Document' });
+    if (target) {
+      const buffer = await this.app.project.toPDF();
       await promises.writeFile(target, buffer);
     }
+    this.send(AppEvents.APP_PDF_EXPORTED);
   }
 
-  public async [Events.APP_FILE](filename: string) {
-    const file = await promises.readFile(filename, 'utf8');
-    const parsed = parse(file);
-    this.app.project = {
-      ...empty,
-      content: { ...parsed },
-      directory: dirname(filename),
-      filename: basename(filename),
-      initial: { ...parsed }
-    };
-    this.app.addRecentFile(filename);
-    this.app.emit(Events.APP_LOAD, this.app.project);
-  }
+  /**
+   * Attempt to close the current document.
+   */
+  protected async close(): Promise<Results> {
+    const open = this.app.project;
 
-  protected async promptSave(): Promise<PromptResult> {
-    if (!is(this.app.project.content, this.app.project.initial)) {
-      const res = dialog.showMessageBox({
+    if (open && open.hasChanges) {
+      const res = await warn({
         buttons: [_(T.BTN_CANCEL), _(T.BTN_DELETE), _(T.BTN_SAVE)],
         detail: _(T.SAVE_AS_DETAIL),
-        message: _(T.SAVE_AS_MESSAGE, this.app.project.filename),
-        type: 'warning'
+        message: _(T.SAVE_AS_MESSAGE, open.filename)
       });
+
       switch (res) {
+        // discard
+        case PromptResult.DISCARD: {
+          return Results.SUCCESS;
+        }
+        // cancel
         case PromptResult.CANCEL:
-        case PromptResult.DISCARD:
-          return res;
-        case PromptResult.SAVE:
-          // open save
-          await this[Events.APP_SAVE]();
-          return PromptResult.SAVE;
+          return Results.CANCEL;
+        // attempt to save
+        case PromptResult.SAVE: {
+          try {
+            let file;
+            if (!this.app.project.version) {
+              const file = save({ mw: 'Markwright' });
+              if (!file) {
+                // the user bailed
+                return Results.CANCEL;
+              }
+            }
+            await this.app.project.save(file);
+          } catch (e) {
+            return Results.FAILURE;
+          }
+        }
       }
     }
-    // file hasn't changed, discard
-    return PromptResult.DISCARD;
+    return Results.SUCCESS;
   }
 }

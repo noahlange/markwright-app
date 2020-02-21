@@ -3,16 +3,11 @@
     <meta charset="UTF-8" />
     <title>Markwright</title>
     <base />
-    <link rel="stylesheet" href="styles/renderer.css" />
+    <link href="styles/editor.css" rel="stylesheet" />
   </head>
   <body>
     <div id="grab-bar"></div>
     <div id="react-root"></div>
-    <script type="text/javascript">
-      window.eval = global.eval = () => {
-        throw new Error('window.eval() has been explicitly disabled.');
-      };
-    </script>
-    <script type="text/javascript" src="scripts/renderer.js"></script>
+    <script type="text/javascript" src="scripts/editor.js"></script>
   </body>
 </html>

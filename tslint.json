@@ -1,9 +1,0 @@
-{
-  "defaultSeverity": "warning",
-  "extends": ["tslint:latest", "tslint-config-prettier"],
-  "rules": {
-    "no-implicit-dependencies": false,
-    "no-submodule-imports": false,
-    "interface-over-type-literal": false
-  }
-}

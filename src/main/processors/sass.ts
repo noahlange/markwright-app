@@ -1,12 +1,31 @@
-import { promises } from 'fs';
+import { promises as fs } from 'fs';
 import cache from 'js-cache';
-import sass from 'node-sass';
+import { render } from 'sass';
 import path from 'path';
 
-import App from '@main/App';
-import { IProcessor } from '@main/events/Content';
+import { Processor, ProcessResult } from '@common/types';
+import Project from '@main/lib/Project';
 
-const read = promises.readFile;
+interface SassImporter {
+  (url: string, prev: string, done: (res: { contents: string }) => void): void;
+}
+
+interface SassOptions {
+  data: string;
+  importer: SassImporter;
+}
+
+interface SassResult {
+  css: Buffer;
+  success: boolean;
+}
+
+const sass = (options: SassOptions): Promise<SassResult> =>
+  new Promise((resolve, reject) =>
+    render(options, (e: Error, res: SassResult) =>
+      e ? reject(e) : resolve(res)
+    )
+  );
 
 /**
  * Resolve SASS imports.
@@ -14,61 +33,59 @@ const read = promises.readFile;
  * @todo should add these files to a watchlist, so imports updated outside the
  * application will be updated...
  */
-function fetch(base: () => string) {
-  return (url: string, prev: string, done: $AnyFixMe) => {
-    const p = prev || path.resolve(base(), url);
-    const has = cache.get(p);
-    if (has) {
-      done(has);
-    }
-    read(p, 'utf8')
-      .then(contents => {
-        cache.set(p, { contents });
-        done({ contents });
-      })
-      .catch(done);
-  };
-}
 
-export default class SASSProcessor implements IProcessor {
-  public app: App;
+export default class SASSProcessor implements Processor {
+  public project: Project;
 
-  public constructor(app: App) {
-    this.app = app;
+  public constructor(project: Project) {
+    this.project = project;
   }
 
-  public async process(value: string) {
-    if (value !== '') {
-      try {
-        return {
-          errors: [],
-          success: true,
-          value: await this.sass(value)
-        };
-      } catch (e) {
-        return {
-          errors: [{ message: e }],
-          success: false,
-          value: ''
-        };
-      }
-    } else {
+  public async process(data: string): Promise<ProcessResult> {
+    try {
+      const res = await sass({
+        data: data || '',
+        importer: (url, prev, done) => {
+          // we explicitly *cannot* return this.
+          this.fetch(url, prev)
+            .then(done)
+            .catch(done);
+        }
+      });
       return {
-        errors: [],
         success: true,
-        value
+        errors: [],
+        value: res.css.toString()
+      };
+    } catch (e) {
+      return {
+        success: false,
+        errors: [{ message: e.message }],
+        value: ''
       };
     }
   }
 
-  protected sass(str: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      sass.render(
-        { data: str, importer: fetch(() => this.app.basedir) },
-        (err, res) => {
-          err ? reject(err.message) : resolve(res.css.toString());
-        }
-      );
-    });
+  protected async fetch(
+    url: string,
+    prev: string
+  ): Promise<{ contents: string }> {
+    const theme = this.project.theme;
+
+    if (url in theme) {
+      const name = url as 'markwright' | 'document' | 'variables';
+      return { contents: theme[name] };
+    }
+
+    const name = cache.has(url)
+      ? url
+      : prev || path.resolve(this.project.directory, url);
+
+    if (!cache.has(name)) {
+      const contents = await fs.readFile(name, 'utf8');
+      cache.set(name, { contents });
+    }
+
+    return cache.get(name);
   }
 }

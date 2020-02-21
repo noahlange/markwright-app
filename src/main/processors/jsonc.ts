@@ -1,6 +1,7 @@
-import App from '@main/App';
 import { parse, ParseError, ParseErrorCode } from 'jsonc-parser';
 import lc from 'line-column';
+import { ProcessResult, Processor, ProjectMetadata } from '@common/types';
+import Project from '@main/lib/Project';
 
 /**
  * Babel doesn't understand const enums, therefore we're using the number literals.
@@ -24,12 +25,15 @@ const ParseErrors: Record<ParseErrorCode, string> = {
   [16]: 'Invalid character'
 };
 
-export default class JSONCProcessor {
-  public app: App;
-  public constructor(app: App) {
-    this.app = app;
+export default class JSONCProcessor implements Processor<ProjectMetadata> {
+  public project: Project;
+
+  public constructor(project: Project) {
+    this.project = project;
   }
-  public async process(content: string) {
+  public async process(
+    content: string
+  ): Promise<ProcessResult<ProjectMetadata>> {
     const errors: ParseError[] = [];
     const value = parse(content, errors);
     return {

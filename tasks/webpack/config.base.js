@@ -1,6 +1,6 @@
 const path = require('path');
 
-const env = process.env.NODE_ENV || 'none';
+const env = process.env.NODE_ENV || 'development';
 
 module.exports = {
   mode: env,
@@ -8,6 +8,7 @@ module.exports = {
     path: path.resolve(__dirname, '../../public'),
     filename: 'scripts/[name].js'
   },
+  stats: 'errors-only',
   module: {
     rules: [
       {
@@ -21,7 +22,7 @@ module.exports = {
                 '@babel/preset-env',
                 {
                   targets: {
-                    electron: '4'
+                    electron: 6
                   }
                 }
               ],
@@ -30,8 +31,10 @@ module.exports = {
             ],
             plugins: [
               ['@babel/plugin-proposal-decorators', { legacy: true }],
-              ['@babel/plugin-proposal-class-properties', { loose: true }],
-              '@babel/plugin-proposal-object-rest-spread'
+              ['@babel/plugin-proposal-class-properties'],
+              '@babel/plugin-proposal-object-rest-spread',
+              '@babel/plugin-proposal-optional-chaining',
+              '@babel/plugin-proposal-nullish-coalescing-operator'
             ]
           }
         }
@@ -40,9 +43,12 @@ module.exports = {
   },
   resolve: {
     alias: {
-      '@main': path.resolve(__dirname, '../../src/main/'),
-      '@common': path.resolve(__dirname, '../../src/common/'),
-      '@renderer': path.resolve(__dirname, '../../src/renderer/')
+      '@main': path.resolve(__dirname, '../../src/main'),
+      '@common': path.resolve(__dirname, '../../src/common'),
+      '@editor': path.resolve(__dirname, '../../src/renderer/editor'),
+      '@preview': path.resolve(__dirname, '../../src/renderer/preview'),
+      '@vendor': path.resolve(__dirname, '../../src/vendor'),
+      '@utils': path.resolve(__dirname, '../../src/utils')
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss', '.css']
   }
