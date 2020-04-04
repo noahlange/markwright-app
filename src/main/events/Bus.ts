@@ -19,7 +19,7 @@ export default class EventBus {
 
   @autobind
   public async handleEvent(_: Electron.Event, data: EventData): Promise<void> {
-    if (this.app.opening) {
+    if (!this.app.opening) {
       this.emit(AppEvents.APP_FILE, {
         opening: this.app.opening
       });
@@ -41,6 +41,7 @@ export default class EventBus {
 
   @autobind
   public emit(event: AppEvents, data: $AnyFixMe = {}): void {
+    console.info({event});
     ipcMain.emit(Events.APP_EVENT, null, { event, ...data });
   }
 }

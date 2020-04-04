@@ -24,7 +24,6 @@ const reducer = combineReducers({ ui, data });
 export default createStore(
   reducer,
   compose(
-    applyMiddleware(promise, listener),
-    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+    applyMiddleware(promise, listener)
   )
 );

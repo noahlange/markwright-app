@@ -25,7 +25,7 @@ export default class Editor extends React.Component<EditorProps> {
 
   public resize = debounce(
     () =>
-      this.editor.layout({
+      this.editor?.layout({
         width: this.props.width,
         height: this.props.height
       }),
