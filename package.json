@@ -92,7 +92,7 @@
     "types": "tsc",
     "start": "electron .",
     "build": "webpack --config tasks/webpack.config.js",
-    "dist": "cross-env NODE_ENV=production npm run build && build"
+    "dist": "cross-env NODE_ENV=production npm run build && electron-builder"
   },
   "nyc": {
     "extends": "@istanbuljs/nyc-config-typescript"
