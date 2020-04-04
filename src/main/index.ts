@@ -11,7 +11,7 @@ app.on(Events.OPEN_FILE, (e, path) => {
   e.preventDefault();
   if (application) {
     application.events.handleEvent(e, {
-      event: AppEvents.OPEN_FILE,
+      event: AppEvents.APP_OPEN,
       payload: { path }
     });
   } else {

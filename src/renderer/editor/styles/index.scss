@@ -90,17 +90,31 @@ header {
   line-height: 1.5;
 }
 
-body {
-  .darwin {
-    #grab-bar {
-      height: 1.5rem;
-      -webkit-app-region: drag;
-    }
-    #react-root {
-      margin-top: -2rem;
+.darwin {
+  #grab-bar {
+    height: 1.5rem;
+    -webkit-app-region: drag;
+  }
+  #react-root {
+    margin-top: -2rem;
+  }
+}
+.win32 #grab-bar {
+  display: none;
+}
+
+.tabs {
+  button {
+    outline: none;
+    cursor: pointer;
+    &:hover {
+      background-color: hsl(0, 0%, 15%);
     }
   }
-  .win32 #grab-bar {
-    display: none;
+
+  &.content .content,
+  &.metadata .metadata,
+  &.styles .styles {
+    background-color: #1e1e1e;
   }
 }

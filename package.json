@@ -33,7 +33,6 @@
     "css-loader": "^3.2.0",
     "debounce": "^1.2.0",
     "electron-builder": "^21.2.0",
-    "electron-devtools-installer": "^2.2.4",
     "eslint": "^6.1.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-prettier": "^3.1.0",
@@ -69,11 +68,11 @@
     "webpack-cli": "^3.1.2",
     "webpack-merge": "^4.2.1",
     "webpack-node-externals": "^1.7.2",
-    "workly": "^1.2.0"
+    "workly": "^1.2.0",
+    "electron": "^6.0.2"
   },
   "dependencies": {
     "core-decorators": "^0.20.0",
-    "electron": "^6.0.2",
     "electron-store": "^4.0.0",
     "hercule": "^4.1.1",
     "js-cache": "^1.0.3",

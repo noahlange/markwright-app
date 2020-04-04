@@ -1,14 +1,9 @@
 import { App as ElectronApp, BrowserWindow, ipcMain, Menu } from 'electron';
 
-import installExtension, {
-  REDUX_DEVTOOLS,
-  REACT_DEVELOPER_TOOLS
-} from 'electron-devtools-installer';
-
 import Store from 'electron-store';
 
 import { platform } from 'os';
-import { resolve } from 'path';
+import { join, resolve } from 'path';
 import { format } from 'url';
 
 import Events, { AppEvents } from '@common/events';
@@ -84,7 +79,7 @@ export default class App {
 
     this.window.loadURL(
       format({
-        pathname: resolve(__dirname, '../index.html'),
+        pathname: join(resolve(__dirname, '..'), './index.html'),
         protocol: 'file:',
         slashes: true
       })
@@ -122,9 +117,6 @@ export default class App {
     });
 
     await this.setMenu();
-
-    await installExtension(REACT_DEVELOPER_TOOLS);
-    await installExtension(REDUX_DEVTOOLS);
     await this.createWindow();
   }
 }
