@@ -14,14 +14,14 @@ export const open = async (): Promise<string | undefined> => {
 
 export const save = async (
   filters: Record<string, string>
-): Promise<string | undefined> => {
+): Promise<string | null> => {
   const res = await dialog.showSaveDialog({
     filters: Object.entries(filters).reduce(
       (a, [key, name]) => a.concat({ name, extensions: [key] }),
       [] as $AnyFixMe[]
     )
   });
-  return res.filePath;
+  return res.filePath ?? null;
 };
 
 const message = (type: string) => async (

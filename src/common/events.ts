@@ -17,6 +17,7 @@ export enum AppEvents {
   APP_FILE = 'app-project-file',
   APP_OPEN = 'app-project-open',
   APP_SAVE = 'app-project-save',
+  APP_SAVE_AS = 'app-project-save-as',
   APP_PDF_EXPORT = 'app-pdf-export',
   APP_PDF_EXPORT_READY = 'app-pdf-export-ready',
   APP_PDF_EXPORTED = 'app-pdf-exported',

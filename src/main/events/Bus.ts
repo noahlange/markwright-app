@@ -19,12 +19,6 @@ export default class EventBus {
 
   @autobind
   public async handleEvent(_: Electron.Event, data: EventData): Promise<void> {
-    if (!this.app.opening) {
-      this.emit(AppEvents.APP_FILE, {
-        opening: this.app.opening
-      });
-      this.app.opening = null;
-    }
     const channel = data.event;
     if (channel in this) {
       const res = await (this as $AnyFixMe)[channel].call(this, data.payload);
@@ -41,7 +35,6 @@ export default class EventBus {
 
   @autobind
   public emit(event: AppEvents, data: $AnyFixMe = {}): void {
-    console.info({event});
     ipcMain.emit(Events.APP_EVENT, null, { event, ...data });
   }
 }

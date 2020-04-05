@@ -1,6 +1,7 @@
 import { generate } from 'shortid';
 
 import { ContentType } from '@common/types';
+import { defaults } from '@main/util/theme';
 import { DataState } from './state';
 import { DataAction, DataActions } from './actions';
 
@@ -25,7 +26,7 @@ const DEFAULT_STATE: DataState = {
   results: {
     [ContentType.CONTENT]: '',
     [ContentType.STYLES]: '',
-    [ContentType.METADATA]: {}
+    [ContentType.METADATA]: { ...defaults }
   },
   errors: {
     [ContentType.CONTENT]: [],

@@ -7,11 +7,10 @@ import { join, resolve } from 'path';
 import { format } from 'url';
 
 import Events, { AppEvents } from '@common/events';
+
 import Project from '@main/lib/Project';
-
-import EventsApplication from '../events/Application';
-
-import ApplicationMenu from '../menu/ApplicationMenu';
+import EventsApplication from '@main/events/Application';
+import ApplicationMenu from '@main/menu/ApplicationMenu';
 
 interface AppSettings {
   app: ElectronApp;
@@ -118,5 +117,12 @@ export default class App {
 
     await this.setMenu();
     await this.createWindow();
+
+    // if we've launched with the intention of opening an existing file,
+    // load it.
+    if (this.opening) {
+      this.project = await Project.from(this.opening);
+      this.events.emit(AppEvents.APP_LOAD);
+    }
   }
 }

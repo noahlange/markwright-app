@@ -49,7 +49,7 @@ export const en: Record<T, string> = {
   [T.EXPORT_TO_PDF]: 'Export to PDF',
   [T.SAVE_AS_DETAIL]:
     "You can choose to save your changes, or delete this document immediately. You can't undo this action.",
-  [T.SAVE_AS_MESSAGE]: 'Do you want to keep "%s.mw"?',
+  [T.SAVE_AS_MESSAGE]: 'Do you want to keep "%s"?',
   [T.PANE_CONTENT]: 'Content',
   [T.PANE_PROBLEMS]: 'Problems',
   [T.PANE_PREVIEW]: 'Preview',

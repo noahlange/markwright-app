@@ -1,5 +1,6 @@
 import { promises } from 'fs';
-import { resolve, basename, dirname } from 'path';
+import { resolve, basename, dirname, join } from 'path';
+import { homedir } from 'os';
 import { generate } from 'shortid';
 
 import App from '@main/lib/App';
@@ -10,22 +11,10 @@ import {
   ProjectMetadata,
   ProcessedProject,
   ProcessResult
-} from '../../common/types';
+} from '@common/types';
 import { parse } from 'jsonc-parser';
 import { SASS, Markdown, JSONC } from '@main/processors';
 import { variables, document, markwright, defaults } from '@main/util/theme';
-
-interface Documents {
-  [ContentType.CONTENT]: Document<string>;
-  [ContentType.STYLES]: Document<string>;
-  [ContentType.METADATA]: Document<ProjectMetadata>;
-}
-
-interface Processors {
-  [ContentType.CONTENT]: Markdown;
-  [ContentType.STYLES]: SASS;
-  [ContentType.METADATA]: JSONC;
-}
 
 export interface SerializedProject {
   [ContentType.CONTENT]: string;
@@ -51,7 +40,7 @@ const EMPTY: SerializedProject = {
 
 export default class Project {
   public static async from(filename?: string): Promise<Project> {
-    let p = new Project(resolve('~/Untitled.mw'));
+    let p = new Project(join(homedir(), 'Untitled.mw'));
     if (filename) {
       const file = await promises.readFile(filename, 'utf8');
       p = new Project(filename, parse(file));
@@ -63,12 +52,23 @@ export default class Project {
   public app!: App;
   public id: string = generate();
 
-  public documents: Documents;
-  public processors: Processors;
+  public documents!: {
+    [ContentType.CONTENT]: Document<string>;
+    [ContentType.STYLES]: Document<string>;
+    [ContentType.METADATA]: Document<ProjectMetadata>;
+  };
+
+  public processors!: {
+    [ContentType.CONTENT]: Markdown;
+    [ContentType.STYLES]: SASS;
+    [ContentType.METADATA]: JSONC;
+  };
 
   public directory: string;
   public filename: string;
   public version: string | null = null;
+
+  public fileExists = false;
 
   public get theme(): {
     document: string;
@@ -95,7 +95,7 @@ export default class Project {
   }
 
   public valueOf<T extends ContentType>(type: T): ProcessedProject[T] {
-    return this.documents[type].value;
+    return this.documents[type].value as ProcessedProject[T];
   }
 
   public contentOf(type: ContentType): string {
@@ -148,11 +148,44 @@ export default class Project {
   }
 
   public async save(saveAs?: string): Promise<void> {
-    return promises.writeFile(
+    const content = this.toContent();
+
+    // set new filename
+    if (saveAs) {
+      this.directory = dirname(saveAs);
+      this.filename = basename(saveAs);
+    }
+
+    await promises.writeFile(
       saveAs || this.filepath,
-      this.toContent(),
+      JSON.stringify(content),
       'utf8'
     );
+
+    // confirm the project exists as a file on disk
+    this.fileExists = true;
+    // regenerate content with new initial values
+    this.createDocuments(content);
+    await this.initialize();
+  }
+
+  protected createProcessors(): void {
+    this.processors = {
+      [ContentType.CONTENT]: new Markdown(this),
+      [ContentType.STYLES]: new SASS(this),
+      [ContentType.METADATA]: new JSONC(this)
+    };
+  }
+
+  protected createDocuments(project: SerializedProject): void {
+    this.documents = {
+      [ContentType.CONTENT]: Document.from(this, project[ContentType.CONTENT]),
+      [ContentType.STYLES]: Document.from(this, project[ContentType.STYLES]),
+      [ContentType.METADATA]: Document.from<ProjectMetadata>(
+        this,
+        project[ContentType.METADATA]
+      )
+    };
   }
 
   public async initialize(): Promise<void> {
@@ -168,22 +201,13 @@ export default class Project {
     }
   }
 
-  public constructor(filename: string, project: SerializedProject = EMPTY) {
+  public constructor(filename: string, project?: SerializedProject) {
+    const data = project ?? EMPTY;
+    this.fileExists = !!project;
     this.filename = basename(filename);
     this.directory = dirname(filename);
-    this.version = project.version;
-    this.documents = {
-      [ContentType.CONTENT]: Document.from(this, project[ContentType.CONTENT]),
-      [ContentType.STYLES]: Document.from(this, project[ContentType.STYLES]),
-      [ContentType.METADATA]: Document.from<ProjectMetadata>(
-        this,
-        project[ContentType.METADATA]
-      )
-    };
-    this.processors = {
-      [ContentType.CONTENT]: new Markdown(this),
-      [ContentType.STYLES]: new SASS(this),
-      [ContentType.METADATA]: new JSONC(this)
-    };
+    this.version = data.version;
+    this.createDocuments(data);
+    this.createProcessors();
   }
 }

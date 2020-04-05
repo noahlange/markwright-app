@@ -1,10 +1,25 @@
 # todo
 
-## Basic functionality
+## Document Basics
+
+- [x] Save, Save As
+  - [x] duplicate `.mw` extension in close dialog?
+  - [ ] only prompt save on unsaved files
+- [x] Open
+  - [ ] OS-level file opening
+    - [x] OSX
+    - [x] Windows
+    - [ ] Linux
+- [ ] New
+  - [x] New File
+  - [ ] New Window
+- [ ] Export to...
+  - [ ] PDF
+
+## Processing
 
 - [ ] filename for sass input (currently displaying `stdin`)
 - [ ] on metadata change, styles must be regenerated (margins, &c.)
-- [ ] duplicate `.mw` extension in close dialog?
 
 ## Upcoming Features
 

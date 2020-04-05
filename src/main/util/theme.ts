@@ -1,4 +1,4 @@
-import { ProjectMetadata } from '@common/types';
+import { ProjectMetadata, Margins } from '@common/types';
 import size, { PaperSize } from 'paper-size';
 
 interface PaperDimensions {
@@ -24,7 +24,7 @@ export const defaults: ProjectMetadata = {
 
 export function variables(user: ProjectMetadata): string {
   const metadata = { ...defaults, ...user };
-  const margins = { ...defaults.margins, ...metadata.margins };
+  const margins: Margins = { ...defaults.margins, ...metadata.margins };
   const paper: PaperSize | PaperDimensions = metadata.paper || defaults.paper;
   const columns = metadata.columns || defaults.columns;
 

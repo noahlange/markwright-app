@@ -73,18 +73,17 @@ export default class Editor extends React.Component<EditorProps> {
   public render(): JSX.Element {
     return (
       <Monaco
+        theme="vs-dark"
         width={this.props.width}
         height={this.props.height}
-        theme="vs-dark"
         defaultValue={this.props.value}
         onChange={this.onChange}
         ref={ref => (this.dom = ref as Monaco)}
+        language={this.language}
         options={{
-          language: this.language,
           fontFamily: 'Fira Code',
           fontLigatures: true,
           fontSize: 15,
-          theme: 'vs-dark',
           wordWrap: 'bounded'
         }}
       />

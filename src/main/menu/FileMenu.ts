@@ -10,11 +10,15 @@ export default class FileMenu extends BaseMenu {
   public fileRecent: RecentsMenu = new RecentsMenu(this.app);
   public submenu: MenuShorthand[] = [
     this.fileNew,
+    { type: 'separator' },
     this.fileOpen,
     this.fileRecent,
-    this.fileSave,
     { type: 'separator' },
-    this.fileExport
+    this.fileSave,
+    this.fileSaveAs
+    // @todo export not currently working
+    // { type: 'separator' },
+    // this.fileExport
   ];
 
   public get fileNew(): MenuShorthand {
@@ -37,6 +41,14 @@ export default class FileMenu extends BaseMenu {
     return {
       accelerator: 'CmdOrCtrl+S',
       click: () => this.app.events.emit(AppEvents.APP_SAVE),
+      label: _(T.SAVE)
+    };
+  }
+
+  public get fileSaveAs(): MenuShorthand {
+    return {
+      accelerator: 'CmdOrCtrl+Shift+S',
+      click: () => this.app.events.emit(AppEvents.APP_SAVE_AS),
       label: _(T.SAVE)
     };
   }

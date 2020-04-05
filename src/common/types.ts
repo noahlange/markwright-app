@@ -16,7 +16,7 @@ export interface ProcessorError {
 export interface ProcessedProject {
   [ContentType.CONTENT]: string;
   [ContentType.STYLES]: string;
-  [ContentType.METADATA]: Partial<ProjectMetadata>;
+  [ContentType.METADATA]: ProjectMetadata;
 }
 
 interface ColumnConfig {
@@ -39,21 +39,22 @@ interface PaperInfo {
   paper: PaperSize;
   orientation: 'portrait' | 'letter';
 }
+export interface Margins {
+  bottom: string;
+  inner: string;
+  outer: string;
+  top: string;
+}
 
 export interface BaseMetadata {
   dpi: number;
   manual: boolean;
-  margins?: {
-    bottom: string;
-    inner: string;
-    outer: string;
-    top: string;
-  };
+  margins: Margins;
 }
 
 export type ProjectMetadata = BaseMetadata &
-  (PaperInfo | PaperDimensions) &
-  ColumnConfig;
+  ColumnConfig &
+  (PaperInfo | PaperDimensions);
 
 export type MenuShorthand = MenuItemConstructorOptions;
 

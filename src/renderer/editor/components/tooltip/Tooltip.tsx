@@ -39,7 +39,7 @@ export default class Tooltip extends React.Component<
   }
 
   public get tooltipStyle(): React.CSSProperties {
-    if (this.state.element) {
+    if (this.state.element && this.wheel) {
       const container = this.wheel.getBoundingClientRect();
       const rect = this.state.element.getBoundingClientRect();
 
@@ -76,19 +76,19 @@ export default class Tooltip extends React.Component<
     }
   }
 
-  public onKeyUp = () => {
+  public onKeyUp = (): void => {
     if (this.state.element) {
       this.setState({ element: null });
     }
   };
 
-  public onKeyDown = (e: KeyboardEvent) => {
+  public onKeyDown = (e: KeyboardEvent): void => {
     if (e.altKey && this.wheel) {
       this.setState({ element: this.target });
     }
   };
 
-  public onMouseOver = (e: React.MouseEvent<HTMLElement>) => {
+  public onMouseOver = (e: React.MouseEvent<HTMLElement>): void => {
     this.target = e.target as HTMLElement;
   };
 
@@ -97,8 +97,10 @@ export default class Tooltip extends React.Component<
     document.addEventListener('keyup', this.onKeyUp);
   }
 
-  public wheelRef = (ref: any) => {
-    this.wheel = ref;
+  public wheelRef = (ref: HTMLDivElement | null): void => {
+    if (ref) {
+      this.wheel = ref;
+    }
   };
 
   public render(): JSX.Element {

@@ -32,6 +32,7 @@
     "cross-env": "^5.2.0",
     "css-loader": "^3.2.0",
     "debounce": "^1.2.0",
+    "electron": "^6.0.2",
     "electron-builder": "^21.2.0",
     "eslint": "^6.1.0",
     "eslint-config-prettier": "^6.0.0",
@@ -63,13 +64,12 @@
     "simple-markdown": "^0.5.1",
     "source-map-loader": "^0.2.3",
     "ts-node": "^8.6.2",
-    "typescript": "^3.7.5",
+    "typescript": "^3.8.3",
     "webpack": "^4.29.3",
     "webpack-cli": "^3.1.2",
     "webpack-merge": "^4.2.1",
     "webpack-node-externals": "^1.7.2",
-    "workly": "^1.2.0",
-    "electron": "^6.0.2"
+    "workly": "^1.2.0"
   },
   "dependencies": {
     "core-decorators": "^0.20.0",
@@ -88,7 +88,7 @@
   },
   "scripts": {
     "pretty": "prettier --write 'src/**/*.{ts,tsx}'",
-    "lint": "tslint --config 'tslint.json' --fix 'src/**/*.{ts,tsx}'",
+    "lint": "eslint --fix 'src/**/*.{ts,tsx}'",
     "types": "tsc",
     "start": "electron .",
     "build": "webpack --config tasks/webpack.config.js",

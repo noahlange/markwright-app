@@ -27,11 +27,9 @@ export default class PanZoom extends React.Component<
   };
 
   public handleZoom = (
-    x: number = this.props.y,
-    y: number = this.props.y,
     s: number = this.props.scale,
     event: WheelEvent
-  ) => {
+  ): void => {
     this.onChange({ scale: s * getScaleMultiplier(event.deltaY) });
   };
 
@@ -58,7 +56,7 @@ export default class PanZoom extends React.Component<
         scale={scale}
         disableZoomToMouse
         onPanAndZoom={this.handlePanAndZoom}
-        onZoom={this.handleZoom}
+        onZoom={(x, y, z, e) => this.handleZoom(z, e)}
         onPanMove={this.handlePan}
         style={{
           width: '100%',

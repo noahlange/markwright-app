@@ -8,21 +8,21 @@ import EventBus from './Bus';
 import { open, save, warn } from '@main/util/dialog';
 import { ContentType, ProcessResult } from '@common/types';
 
-enum Results {
+enum Result {
   SUCCESS,
   FAILURE,
   CANCEL
-}
-
-interface Dimensions {
-  width: number;
-  height: number;
 }
 
 export enum PromptResult {
   CANCEL = 0,
   DISCARD = 1,
   SAVE = 2
+}
+
+interface Dimensions {
+  width: number;
+  height: number;
 }
 
 export default class ApplicationEvents extends EventBus {
@@ -40,17 +40,17 @@ export default class ApplicationEvents extends EventBus {
 
   public async [AppEvents.APP_CLOSE](): Promise<boolean> {
     switch (await this.close()) {
-      case Results.SUCCESS:
+      case Result.SUCCESS:
         return true;
-      case Results.FAILURE:
-      case Results.CANCEL:
+      case Result.FAILURE:
+      case Result.CANCEL:
         return false;
     }
   }
 
   public async [AppEvents.APP_NEW](): Promise<void> {
     switch (await this.close()) {
-      case Results.SUCCESS: {
+      case Result.SUCCESS: {
         this.app.project = await Project.from();
         this.emit(AppEvents.APP_LOAD);
       }
@@ -78,25 +78,27 @@ export default class ApplicationEvents extends EventBus {
 
   public async [AppEvents.APP_OPEN](filename?: string): Promise<void> {
     switch (await this.close()) {
-      case Results.SUCCESS: {
-        const name = filename || (await open());
+      case Result.SUCCESS: {
+        const name = filename ?? (await open());
         if (name) {
-          this.app.project = await Project.from(name);
-          if (this.app.window) {
-            this.app.window.setRepresentedFilename(name);
-            this.app.electron.addRecentDocument(name);
-            this.app.store.set('recent', [name, ...this.app.recent]);
-            this.app.setMenu();
-          }
-          this.emit(AppEvents.APP_LOAD);
+          await this.open(name);
         }
       }
     }
   }
 
+  /**
+   * Create a new file with the current project contents.
+   */
+  public async [AppEvents.APP_SAVE_AS](): Promise<void> {
+    await this.save(true);
+    this.emit(AppEvents.APP_LOAD);
+  }
+
   public async [AppEvents.APP_SAVE](): Promise<void> {
-    await this.close();
-    return;
+    // re-populate client store
+    await this.save();
+    this.emit(AppEvents.APP_LOAD);
   }
 
   public async [AppEvents.APP_PDF_EXPORT_READY](): Promise<void> {
@@ -109,12 +111,44 @@ export default class ApplicationEvents extends EventBus {
   }
 
   /**
+   * Open a project at a specified filename;
+   */
+  protected async open(filename: string): Promise<void> {
+    this.app.project = await Project.from(filename);
+    if (this.app.window) {
+      this.app.window.setRepresentedFilename(filename);
+      this.app.electron.addRecentDocument(filename);
+      this.app.store.set('recent', [filename, ...this.app.recent]);
+      this.app.setMenu();
+    }
+    this.emit(AppEvents.APP_LOAD);
+  }
+
+  protected async save(saveAs?: boolean): Promise<unknown> {
+    // prompt if the file doesn't currently exist
+    let filename;
+    if (saveAs || !this.app.project.fileExists) {
+      filename = await save({ mw: 'Markwright' });
+      if (!filename) {
+        return Result.CANCEL;
+      }
+    }
+    try {
+      await this.app.project.save(filename);
+      return Result.SUCCESS;
+    } catch (e) {
+      return Result.FAILURE;
+    }
+  }
+
+  /**
    * Attempt to close the current document.
    */
-  protected async close(): Promise<Results> {
+  protected async close(): Promise<Result> {
     const open = this.app.project;
 
-    if (open && open.hasChanges) {
+    if (open?.hasChanges) {
+      // the project has unsaved changes
       const res = await warn({
         buttons: [_(T.BTN_CANCEL), _(T.BTN_DELETE), _(T.BTN_SAVE)],
         detail: _(T.SAVE_AS_DETAIL),
@@ -124,29 +158,29 @@ export default class ApplicationEvents extends EventBus {
       switch (res) {
         // discard
         case PromptResult.DISCARD: {
-          return Results.SUCCESS;
+          // create blank project
+          try {
+            this.app.project = await Project.from();
+            return Result.SUCCESS;
+          } catch (e) {
+            return Result.FAILURE;
+          }
         }
-        // cancel
-        case PromptResult.CANCEL:
-          return Results.CANCEL;
         // attempt to save
         case PromptResult.SAVE: {
           try {
-            let file;
-            if (!this.app.project.version) {
-              const file = save({ mw: 'Markwright' });
-              if (!file) {
-                // the user bailed
-                return Results.CANCEL;
-              }
-            }
-            await this.app.project.save(file);
+            await this[AppEvents.APP_SAVE]();
+            return Result.SUCCESS;
           } catch (e) {
-            return Results.FAILURE;
+            return Result.FAILURE;
           }
+        }
+        // cancel
+        case PromptResult.CANCEL: {
+          return Result.CANCEL;
         }
       }
     }
-    return Results.SUCCESS;
+    return Result.SUCCESS;
   }
 }
