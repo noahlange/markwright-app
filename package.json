@@ -41,7 +41,7 @@
     "fast-deep-equal": "^3.1.1",
     "file-loader": "^4.2.0",
     "firacode": "^1.205.0",
-    "highlight.js": "^9.14.2",
+    "highlight.js": "^10.4.1",
     "markwright": "noahlange/markwright#virtualized",
     "mini-css-extract-plugin": "^0.8.0",
     "monaco-editor": "^0.20.0",
